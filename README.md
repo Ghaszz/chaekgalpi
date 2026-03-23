@@ -22,7 +22,7 @@
 - Spring Boot 3
 - Spring Security
 - Spring Data JPA
-- H2 Database
+- MtSQL
 - Maven
 
 **Frontend:**
