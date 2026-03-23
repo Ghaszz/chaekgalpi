@@ -1,3 +1,20 @@
+# 📚 Chaekgalpi - Novel Tracker
+
+> Gerencie suas leituras de novels coreanas com estilo e acompanhe estatísticas detalhadas
+
+## ✨ Sobre o Projeto
+
+**Chaekgalpi** (책갈피) significa "marcador de páginas" em coreano. Sistema completo para gerenciar sua lista de leitura de novels coreanas.
+
+### 🎯 Funcionalidades
+
+- 📝 **CRUD completo** de novels
+- ⭐ **Sistema de favoritos**
+- 🔍 **Filtros e busca** por nome, status e favoritos
+- 📊 **Dashboard estatístico** com gráficos e rankings
+- 🔐 **Autenticação** Basic Auth com Spring Security
+- 📱 **Design responsivo**
+
 ## 🛠️ Tecnologias
 
 **Backend:**
@@ -5,7 +22,7 @@
 - Spring Boot 3
 - Spring Security
 - Spring Data JPA
-- **MySQL** - Banco de dados relacional
+- H2 Database
 - Maven
 
 **Frontend:**
@@ -14,20 +31,4 @@
 - Chart.js
 - Google Fonts
 
-## 🚀 Como Executar
 
-### Pré-requisitos
-- Java 21
-- MySQL 8+
-- Maven
-
-## 📁 Estrutura
-chaekgalpi/
-├── src/main/java/.../chaekgalpi/
-│ ├── controller/ # Endpoints REST
-│ ├── model/ # Entidades
-│ ├── repository/ # Persistência
-│ └── service/ # Regras de negócio
-├── index.html # Página principal
-├── estatisticas.html # Dashboard
-└── pom.xml # Dependências
