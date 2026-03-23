@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estatísticas - Chaekgalpi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+          --bg: #0d0d14;
+          --bg2: #13131f;
+          --bg3: #1a1a2a;
+          --border: rgba(255,255,255,0.07);
+          --primary: #8b5cf6;
+          --primary-light: #a78bfa;
+          --secondary: #38bdf8;
+          --green: #34d399;
+          --red: #f87171;
+          --yellow: #fbbf24;
+          --orange: #fb923c;
+          --text: #e2e2ef;
+          --text-muted: #6b6b8a;
+          --radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; }
+        body::before {
+          content: '';
+          position: fixed; inset: 0;
+          background:
+            radial-gradient(ellipse at 15% 0%, rgba(139,92,246,0.1) 0%, transparent 50%),
+            radial-gradient(ellipse at 85% 100%, rgba(56,189,248,0.07) 0%, transparent 50%);
+          pointer-events: none; z-index: 0;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 32px 20px; position: relative; z-index: 1; }
+
+        /* HEADER */
+        .page-header { text-align: center; margin-bottom: 32px; }
+        .page-header h1 {
+          font-size: 2.4em; font-weight: 800; letter-spacing: -1px;
+          background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .page-header p { color: var(--text-muted); margin-top: 6px; font-size: 0.95em; }
+
+        .back-btn {
+          display: inline-flex; align-items: center; gap: 6px;
+          margin-bottom: 28px; padding: 9px 20px;
+          background: rgba(139,92,246,0.1); color: var(--primary-light);
+          border: 1px solid rgba(139,92,246,0.2); border-radius: 8px;
+          font-family: inherit; font-weight: 600; font-size: 0.88em;
+          text-decoration: none; transition: all 0.2s;
+        }
+        .back-btn:hover { background: rgba(139,92,246,0.2); }
+
+        /* QUICK STATS */
+        .quick-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 24px; }
+        .stat-card {
+          background: var(--bg2); border: 1px solid var(--border);
+          border-radius: var(--radius); padding: 18px 16px; text-align: center;
+          position: relative; overflow: hidden; transition: all 0.25s;
+        }
+        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: linear-gradient(180deg, var(--primary), var(--secondary)); }
+        .stat-card:hover { transform: translateY(-3px); border-color: rgba(139,92,246,0.3); }
+        .stat-card .icon { font-size: 1.8em; margin-bottom: 8px; }
+        .stat-card .num {
+          font-size: 1.8em; font-weight: 800; display: block;
+          background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .stat-card .lbl { font-size: 0.72em; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
+        .stat-card .detail { font-size: 0.78em; color: var(--text-muted); margin-top: 5px; }
+
+        /* INSIGHTS */
+        .section { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; margin-bottom: 20px; }
+        .section-title { font-size: 1em; font-weight: 700; color: var(--primary-light); margin-bottom: 16px; }
+        .insight-item {
+          background: var(--bg3); border: 1px solid var(--border);
+          border-radius: 10px; padding: 13px 16px; margin-bottom: 10px;
+          display: flex; gap: 12px; align-items: center;
+        }
+        .insight-item:last-child { margin-bottom: 0; }
+        .insight-item .icon { font-size: 1.6em; flex-shrink: 0; }
+        .insight-item .title { font-weight: 700; font-size: 0.9em; margin-bottom: 3px; }
+        .insight-item .desc { font-size: 0.82em; color: var(--text-muted); line-height: 1.5; }
+
+        /* STREAK & METAS */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .progress-bar-wrap { margin-bottom: 14px; }
+        .progress-bar-wrap:last-child { margin-bottom: 0; }
+        .progress-label { display: flex; justify-content: space-between; font-size: 0.82em; margin-bottom: 6px; }
+        .progress-label span:first-child { font-weight: 600; }
+        .progress-label span:last-child { color: var(--text-muted); }
+        .progress-track { height: 8px; background: var(--bg3); border-radius: 20px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 20px; transition: width 1s ease; }
+        .fill-green { background: linear-gradient(90deg, var(--green), #059669); }
+        .fill-blue { background: linear-gradient(90deg, var(--secondary), #0284c7); }
+        .fill-purple { background: linear-gradient(90deg, var(--primary-light), var(--primary)); }
+        .fill-red { background: linear-gradient(90deg, var(--red), #dc2626); }
+
+        /* RANKING TABS */
+        .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+        .tab {
+          padding: 7px 16px; border-radius: 8px; font-family: inherit;
+          font-size: 0.82em; font-weight: 600; cursor: pointer; border: none;
+          background: var(--bg3); color: var(--text-muted); transition: all 0.2s;
+        }
+        .tab.active { background: rgba(139,92,246,0.2); color: var(--primary-light); border: 1px solid rgba(139,92,246,0.3); }
+
+        /* NOVELS LIST */
+        .novel-item {
+          background: var(--bg3); border: 1px solid var(--border);
+          border-radius: 10px; padding: 13px 16px; margin-bottom: 8px;
+          display: flex; align-items: center; gap: 14px; transition: all 0.2s;
+        }
+        .novel-item:last-child { margin-bottom: 0; }
+        .novel-item:hover { border-color: rgba(139,92,246,0.3); transform: translateX(4px); }
+        .novel-item .rank { font-size: 1.2em; font-weight: 800; color: var(--primary-light); min-width: 26px; }
+        .novel-item .rank.gold { color: #fbbf24; }
+        .novel-item .rank.silver { color: #94a3b8; }
+        .novel-item .rank.bronze { color: #b45309; }
+        .novel-item .info { flex: 1; min-width: 0; }
+        .novel-item .name { font-weight: 700; font-size: 0.88em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .novel-item .kor { font-family: 'Noto Sans KR', sans-serif; font-size: 0.76em; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .novel-item .caps { font-weight: 800; color: var(--secondary); white-space: nowrap; font-size: 0.9em; }
+        .novel-item .badge { padding: 2px 9px; border-radius: 20px; font-size: 0.72em; font-weight: 600; margin-left: 8px; }
+        .badge-ACOMPANHANDO { background: rgba(56,189,248,0.1); color: #38bdf8; }
+        .badge-CONCLUIDA { background: rgba(52,211,153,0.1); color: var(--green); }
+        .badge-PAUSADA, .badge-RETOMANDO_DEPOIS { background: rgba(251,191,36,0.1); color: var(--yellow); }
+        .badge-DROPADA { background: rgba(248,113,113,0.1); color: var(--red); }
+
+        /* CHARTS */
+        .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .chart-box { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
+        .chart-box.full { grid-column: 1 / -1; }
+        .chart-box h3 { font-size: 0.95em; font-weight: 700; color: var(--text); margin-bottom: 16px; }
+
+        /* EMPTY */
+        .empty { text-align: center; padding: 40px; color: var(--text-muted); font-size: 0.9em; }
+
+        @media (max-width: 700px) {
+          .charts-grid { grid-template-columns: 1fr; }
+          .chart-box.full { grid-column: 1; }
+          .two-col { grid-template-columns: 1fr; }
+          .page-header h1 { font-size: 1.8em; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="page-header">
+        <h1>📊 Estatísticas</h1>
+        <p>Análise completa dos seus dados de leitura</p>
+    </div>
+
+    <a href="index.html" class="back-btn">← Voltar para a Lista</a>
+
+    <!-- QUICK STATS -->
+    <div class="quick-stats" id="quickStats">
+        <div class="stat-card"><div class="icon">⏳</div><span class="num">...</span><span class="lbl">Carregando</span></div>
+    </div>
+
+    <!-- INSIGHTS -->
+    <div class="section">
+        <div class="section-title">💡 Insights</div>
+        <div id="insightsList"><div class="empty">Carregando...</div></div>
+    </div>
+
+    <!-- METAS & DISTRIBUIÇÃO -->
+    <div class="two-col">
+        <div class="section">
+            <div class="section-title">🎯 Metas de Leitura</div>
+            <div id="metas"></div>
+        </div>
+        <div class="section">
+            <div class="section-title">📈 Distribuição por Status</div>
+            <div id="statusDist"></div>
+        </div>
+    </div>
+
+    <!-- RANKING -->
+    <div class="section">
+        <div class="section-title">🏆 Rankings</div>
+        <div class="tabs">
+            <button class="tab active" onclick="mudarTab('longest')">Mais Longas</button>
+            <button class="tab" onclick="mudarTab('shortest')">Mais Curtas</button>
+            <button class="tab" onclick="mudarTab('dropped')">Dropadas</button>
+            <button class="tab" onclick="mudarTab('favs')">Favoritas</button>
+        </div>
+        <div id="rankingContent"></div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="charts-grid">
+        <div class="chart-box"><h3>🍩 Status das Novels</h3><canvas id="chartStatus"></canvas></div>
+        <div class="chart-box"><h3>📏 Tamanho das Novels</h3><canvas id="chartSize"></canvas></div>
+        <div class="chart-box full"><h3>📖 Capítulos por Status</h3><canvas id="chartCaps"></canvas></div>
+    </div>
+
+</div>
+
+<script>
+    const API = 'http://localhost:8080/novels';
+    const AUTH = 'Basic ' + btoa('admin:1234');
+    Chart.defaults.color = '#6b6b8a';
+    Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+    const statusLabel = {
+      ACOMPANHANDO: '📖 Acompanhando',
+      CONCLUIDA: '✅ Concluída',
+      PAUSADA: '⏸️ Pausada',
+      RETOMANDO_DEPOIS: '🔄 Retomando depois',
+      DROPADA: '❌ Dropada'
+    };
+    const statusColors = {
+      ACOMPANHANDO: '#38bdf8', CONCLUIDA: '#34d399',
+      PAUSADA: '#fbbf24', RETOMANDO_DEPOIS: '#fb923c', DROPADA: '#f87171'
+    };
+
+    let allNovels = [];
+    let tabAtual = 'longest';
+
+    async function load() {
+      try {
+        const r = await fetch(API, { headers: { Authorization: AUTH } });
+        allNovels = await r.json();
+        renderAll();
+      } catch(e) {
+        document.getElementById('quickStats').innerHTML = `<div class="empty">⚠️ Erro ao conectar com a API.</div>`;
+      }
+    }
+
+    function renderAll() {
+      renderQuickStats();
+      renderInsights();
+      renderMetas();
+      renderStatusDist();
+      renderRanking(tabAtual);
+      renderCharts();
+    }
+
+    function renderQuickStats() {
+      const n = allNovels;
+      const total = n.length;
+      const caps = n.reduce((s, x) => s + (x.chapter || 0), 0);
+      const avg = total > 0 ? (caps / total).toFixed(1) : 0;
+      const favs = n.filter(x => x.favorito).length;
+      const concluidas = n.filter(x => x.status === 'CONCLUIDA').length;
+      const dropadas = n.filter(x => x.status === 'DROPADA').length;
+      const maior = [...n].sort((a, b) => (b.chapter||0) - (a.chapter||0))[0];
+      const taxaConc = total > 0 ? ((concluidas/total)*100).toFixed(1) : 0;
+      const taxaDrop = total > 0 ? ((dropadas/total)*100).toFixed(1) : 0;
+      const dropCaps = n.filter(x => x.status === 'DROPADA');
+      const mediaDrop = dropCaps.length > 0 ? Math.round(dropCaps.reduce((s,x) => s+(x.chapter||0), 0) / dropCaps.length) : 0;
+
+      const cards = [
+        { icon: '📚', num: total, lbl: 'Total de Novels' },
+        { icon: '📖', num: caps.toLocaleString('pt-BR'), lbl: 'Capítulos Lidos' },
+        { icon: '📊', num: avg, lbl: 'Média por Novel' },
+        { icon: '⭐', num: favs, lbl: 'Favoritos', detail: `${total>0?((favs/total)*100).toFixed(1):0}% do total` },
+        { icon: '✅', num: concluidas, lbl: 'Concluídas', detail: `Taxa: ${taxaConc}%` },
+        { icon: '❌', num: dropadas, lbl: 'Dropadas', detail: `Taxa: ${taxaDrop}%` },
+        { icon: '🏆', num: maior ? (maior.chapter||0).toLocaleString('pt-BR') : 0, lbl: 'Maior Progresso', detail: maior ? maior.nameEng.substring(0,18)+'...' : '-' },
+        ...(dropadas > 0 ? [{ icon: '📉', num: mediaDrop, lbl: 'Média de Drop', detail: 'cap. onde dropa' }] : [])
+      ];
+
+      document.getElementById('quickStats').innerHTML = cards.map(c =>
+        `<div class="stat-card">
+          <div class="icon">${c.icon}</div>
+          <span class="num">${c.num}</span>
+          <span class="lbl">${c.lbl}</span>
+          ${c.detail ? `<div class="detail">${c.detail}</div>` : ''}
+        </div>`
+      ).join('');
+    }
+
+    function renderInsights() {
+      const n = allNovels;
+      const total = n.length;
+      const caps = n.reduce((s, x) => s + (x.chapter||0), 0);
+      const concluidas = n.filter(x => x.status === 'CONCLUIDA').length;
+      const dropadas = n.filter(x => x.status === 'DROPADA').length;
+      const pausadas = n.filter(x => x.status === 'PAUSADA' || x.status === 'RETOMANDO_DEPOIS').length;
+      const taxaConc = total > 0 ? (concluidas/total)*100 : 0;
+      const taxaDrop = total > 0 ? (dropadas/total)*100 : 0;
+      const maior = [...n].sort((a, b) => (b.chapter||0) - (a.chapter||0))[0];
+      const dropCaps = n.filter(x => x.status === 'DROPADA');
+      const mediaDrop = dropCaps.length > 0 ? Math.round(dropCaps.reduce((s,x) => s+(x.chapter||0), 0) / dropCaps.length) : 0;
+
+      const insights = [];
+
+      if (caps >= 10000) insights.push({ icon: '🏆', title: 'Leitor Lendário!', desc: `${caps.toLocaleString('pt-BR')} capítulos lidos! Você é absurdo! 🔥` });
+      else if (caps >= 5000) insights.push({ icon: '🚀', title: 'Leitor Dedicado!', desc: `${caps.toLocaleString('pt-BR')} capítulos lidos! Metade do caminho para 10 mil!` });
+      else if (caps >= 1000) insights.push({ icon: '🎉', title: 'Bom progresso!', desc: `Mais de 1.000 capítulos lidos! Continue assim!` });
+
+      if (taxaConc >= 60) insights.push({ icon: '🌟', title: 'Você termina o que começa!', desc: `${taxaConc.toFixed(1)}% de taxa de conclusão. Impressionante!` });
+      else if (taxaConc < 20 && total >= 5) insights.push({ icon: '⚡', title: 'Muitas em andamento!', desc: `Só ${taxaConc.toFixed(1)}% concluídas. Que tal focar em terminar algumas?` });
+
+      if (taxaDrop > 40) insights.push({ icon: '⚠️', title: 'Alta taxa de drop', desc: `${taxaDrop.toFixed(1)}% dropadas, em média no cap. ${mediaDrop}. Seja mais seletivo antes de começar!` });
+      else if (taxaDrop < 10 && total >= 5) insights.push({ icon: '✨', title: 'Ótima seleção!', desc: `Apenas ${taxaDrop.toFixed(1)}% de drops. Você tem bom critério! 👏` });
+
+      if (pausadas >= 5) insights.push({ icon: '⏸️', title: 'Novels paradas acumulando!', desc: `${pausadas} novels pausadas. Que tal retomar alguma delas?` });
+
+      if (maior && maior.chapter >= 1000) insights.push({ icon: '🔥', title: 'Maratonista confirmado!', desc: `"${maior.nameEng}" com ${maior.chapter.toLocaleString('pt-BR')} caps. Você é dedicado demais! 🎖️` });
+      else if (maior && maior.chapter >= 500) insights.push({ icon: '💪', title: 'Leitor maratonista!', desc: `"${maior.nameEng}" com ${maior.chapter.toLocaleString('pt-BR')} caps lidos!` });
+
+      if (total === 0) insights.push({ icon: '📝', title: 'Comece sua jornada!', desc: 'Adicione sua primeira novel e acompanhe seu progresso.' });
+
+      document.getElementById('insightsList').innerHTML = insights.length > 0
+        ? insights.map(i => `<div class="insight-item"><div class="icon">${i.icon}</div><div><div class="title">${i.title}</div><div class="desc">${i.desc}</div></div></div>`).join('')
+        : '<div class="empty">Adicione mais novels para ver insights personalizados!</div>';
+    }
+
+    function renderMetas() {
+      const n = allNovels;
+      const caps = n.reduce((s, x) => s + (x.chapter||0), 0);
+      const concluidas = n.filter(x => x.status === 'CONCLUIDA').length;
+      const total = n.length;
+
+      const metas = [
+        { label: '8.000 capítulos', val: Math.min(caps, 1000), max: 1000, cls: 'fill-blue' },
+        { label: '25.000 capítulos', val: Math.min(caps, 5000), max: 5000, cls: 'fill-purple' },
+        { label: '45.000 capítulos', val: Math.min(caps, 10000), max: 10000, cls: 'fill-green' },
+        { label: '60 novels concluídas', val: Math.min(concluidas, 10), max: 10, cls: 'fill-green' },
+        { label: '100 novels cadastradas', val: Math.min(total, 50), max: 50, cls: 'fill-blue' },
+      ];
+
+      document.getElementById('metas').innerHTML = metas.map(m => {
+        const pct = Math.round((m.val / m.max) * 100);
+        return `<div class="progress-bar-wrap">
+          <div class="progress-label"><span>${m.label}</span><span>${m.val.toLocaleString('pt-BR')} / ${m.max.toLocaleString('pt-BR')} (${pct}%)</span></div>
+          <div class="progress-track"><div class="progress-fill ${m.cls}" style="width:${pct}%"></div></div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderStatusDist() {
+      const n = allNovels;
+      const total = n.length;
+      const counts = {};
+      n.forEach(x => { counts[x.status] = (counts[x.status]||0) + 1; });
+
+      document.getElementById('statusDist').innerHTML = Object.entries(counts).map(([s, c]) => {
+        const pct = total > 0 ? Math.round((c/total)*100) : 0;
+        const cor = statusColors[s] || '#6b6b8a';
+        return `<div class="progress-bar-wrap">
+          <div class="progress-label"><span>${statusLabel[s] || s}</span><span>${c} (${pct}%)</span></div>
+          <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${cor}"></div></div>
+        </div>`;
+      }).join('') || '<div class="empty">Nenhum dado ainda.</div>';
+    }
+
+    function mudarTab(tab) {
+      tabAtual = tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      renderRanking(tab);
+    }
+
+    function renderRanking(tab) {
+      const n = allNovels;
+      let lista = [];
+
+      if (tab === 'longest') lista = [...n].sort((a,b) => (b.chapter||0)-(a.chapter||0)).slice(0,10);
+      else if (tab === 'shortest') lista = n.filter(x => (x.chapter||0) > 0).sort((a,b) => (a.chapter||0)-(b.chapter||0)).slice(0,10);
+      else if (tab === 'dropped') lista = n.filter(x => x.status === 'DROPADA').sort((a,b) => (b.chapter||0)-(a.chapter||0));
+      else if (tab === 'favs') lista = n.filter(x => x.favorito).sort((a,b) => (b.chapter||0)-(a.chapter||0));
+
+      if (lista.length === 0) {
+        document.getElementById('rankingContent').innerHTML = '<div class="empty">Nenhuma novel nessa categoria ainda.</div>';
+        return;
+      }
+
+      document.getElementById('rankingContent').innerHTML = lista.map((x, i) => {
+        const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
+        return `<div class="novel-item">
+          <div class="rank ${rankClass}">${medal}</div>
+          <div class="info">
+            <div class="name">${esc(x.nameEng || '')}</div>
+            <div class="kor">${esc(x.nameKor || '')}</div>
+          </div>
+          <div style="display:flex;align-items:center;">
+            <span class="caps">${(x.chapter||0).toLocaleString('pt-BR')} caps</span>
+            <span class="badge badge-${x.status}">${statusLabel[x.status] || x.status}</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderCharts() {
+      const n = allNovels;
+      const statusMap = {};
+      const capsMap = {};
+      n.forEach(x => {
+        statusMap[x.status] = (statusMap[x.status]||0) + 1;
+        capsMap[x.status] = (capsMap[x.status]||0) + (x.chapter||0);
+      });
+
+      new Chart(document.getElementById('chartStatus'), {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(statusMap).map(k => statusLabel[k]||k),
+          datasets: [{
+            data: Object.values(statusMap),
+            backgroundColor: Object.keys(statusMap).map(k => statusColors[k]||'#6b6b8a'),
+            borderWidth: 3, borderColor: '#0d0d14', hoverOffset: 8
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { padding: 14, font: { family: 'Plus Jakarta Sans' } } } } }
+      });
+
+      const ranges = {'0-50':0,'51-100':0,'101-200':0,'201-500':0,'501+':0};
+      n.forEach(x => {
+        const c = x.chapter||0;
+        if (c<=50) ranges['0-50']++; else if (c<=100) ranges['51-100']++; else if (c<=200) ranges['101-200']++; else if (c<=500) ranges['201-500']++; else ranges['501+']++;
+      });
+
+      new Chart(document.getElementById('chartSize'), {
+        type: 'bar',
+        data: {
+          labels: Object.keys(ranges),
+          datasets: [{
+            data: Object.values(ranges),
+            backgroundColor: ['rgba(56,189,248,0.7)','rgba(139,92,246,0.7)','rgba(52,211,153,0.7)','rgba(251,191,36,0.7)','rgba(248,113,113,0.7)'],
+            borderRadius: 8, borderWidth: 0
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+      });
+
+      new Chart(document.getElementById('chartCaps'), {
+        type: 'bar',
+        data: {
+          labels: Object.keys(capsMap).map(k => statusLabel[k]||k),
+          datasets: [{
+            data: Object.values(capsMap),
+            backgroundColor: Object.keys(capsMap).map(k => (statusColors[k]||'#6b6b8a')+'bb'),
+            borderRadius: 8, borderWidth: 0
+          }]
+        },
+        options: {
+          indexAxis: 'y', responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { x: { beginAtZero: true } }
+        }
+      });
+    }
+
+    function esc(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    load();
+</script>
+</body>
+</html>

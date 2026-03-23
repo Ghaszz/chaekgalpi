@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chaekgalpi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+          --bg: #0d0d14;
+          --bg2: #13131f;
+          --bg3: #1a1a2a;
+          --border: rgba(255,255,255,0.07);
+          --primary: #8b5cf6;
+          --primary-light: #a78bfa;
+          --secondary: #38bdf8;
+          --green: #34d399;
+          --red: #f87171;
+          --yellow: #fbbf24;
+          --text: #e2e2ef;
+          --text-muted: #6b6b8a;
+          --radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+          background: var(--bg);
+          color: var(--text);
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          min-height: 100vh;
+        }
+        body::before {
+          content: '';
+          position: fixed; inset: 0;
+          background:
+            radial-gradient(ellipse at 15% 0%, rgba(139,92,246,0.12) 0%, transparent 50%),
+            radial-gradient(ellipse at 85% 100%, rgba(56,189,248,0.08) 0%, transparent 50%);
+          pointer-events: none; z-index: 0;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 32px 20px; position: relative; z-index: 1; }
+
+        header { text-align: center; margin-bottom: 36px; }
+        header h1 {
+          font-size: 2.6em; font-weight: 800; letter-spacing: -1px;
+          background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary) 100%);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        header p { color: var(--text-muted); margin-top: 6px; font-size: 0.95em; }
+        .header-stats { display: flex; justify-content: center; gap: 16px; margin-top: 24px; flex-wrap: wrap; }
+        .stat-pill {
+          background: var(--bg2); border: 1px solid var(--border);
+          border-radius: 40px; padding: 10px 22px; text-align: center;
+        }
+        .stat-pill .num {
+          font-size: 1.5em; font-weight: 800; display: block;
+          background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .stat-pill .lbl { font-size: 0.75em; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .stats-link { text-align: center; margin-bottom: 28px; }
+        .btn-stats {
+          display: inline-block; padding: 10px 24px;
+          background: rgba(139,92,246,0.12); color: var(--primary-light);
+          border: 1px solid rgba(139,92,246,0.25); border-radius: 8px;
+          font-family: inherit; font-weight: 600; font-size: 0.9em;
+          text-decoration: none; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-stats:hover { background: rgba(139,92,246,0.22); }
+
+        .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
+        .card-title { font-size: 1em; font-weight: 700; color: var(--primary-light); margin-bottom: 18px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+        label { display: block; font-size: 0.75em; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        input[type=text], input[type=number], select {
+          width: 100%; padding: 9px 13px;
+          background: var(--bg3); border: 1px solid var(--border);
+          border-radius: 8px; color: var(--text);
+          font-family: inherit; font-size: 0.9em; outline: none;
+          transition: border-color 0.2s;
+        }
+        input[type=text]:focus, input[type=number]:focus, select:focus { border-color: var(--primary); }
+        select option { background: #1a1a2e; }
+        .btn-add {
+          width: 100%; padding: 10px;
+          background: linear-gradient(135deg, var(--primary), #6366f1);
+          border: none; border-radius: 8px; color: #fff;
+          font-family: inherit; font-weight: 700; font-size: 0.95em;
+          cursor: pointer; transition: opacity 0.2s; margin-top: 22px;
+        }
+        .btn-add:hover { opacity: 0.85; }
+
+        .search-input {
+          width: 100%; padding: 11px 16px;
+          background: var(--bg2); border: 1px solid var(--border);
+          border-radius: var(--radius); color: var(--text);
+          font-family: inherit; font-size: 0.95em; outline: none;
+          margin-bottom: 14px; transition: border-color 0.2s;
+        }
+        .search-input:focus { border-color: var(--primary); }
+        .filters { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 24px; display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
+        .filter-g { min-width: 140px; }
+        .btn-clear {
+          padding: 9px 16px; background: rgba(248,113,113,0.1); color: var(--red);
+          border: 1px solid rgba(248,113,113,0.2); border-radius: 8px;
+          font-family: inherit; font-weight: 600; font-size: 0.85em;
+          cursor: pointer; margin-left: auto; transition: all 0.2s;
+        }
+        .btn-clear:hover { background: rgba(248,113,113,0.2); }
+
+        .novels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+        .novel-card {
+          background: var(--bg2); border: 1px solid var(--border);
+          border-radius: var(--radius); padding: 18px;
+          position: relative; transition: all 0.2s;
+        }
+        .novel-card:hover { border-color: rgba(139,92,246,0.35); transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.35); }
+        .novel-num { position: absolute; top: 14px; right: 14px; font-size: 0.72em; font-weight: 700; color: var(--text-muted); }
+        .novel-eng { font-size: 0.92em; font-weight: 700; line-height: 1.4; padding-right: 28px; margin-bottom: 4px; }
+        .novel-kor { font-family: 'Noto Sans KR', sans-serif; font-size: 0.8em; color: var(--text-muted); font-weight: 300; margin-bottom: 12px; }
+        .badges { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; }
+        .badge { padding: 3px 10px; border-radius: 20px; font-size: 0.78em; font-weight: 600; }
+        .badge-chapter { background: rgba(56,189,248,0.12); color: var(--secondary); border: 1px solid rgba(56,189,248,0.2); }
+        .badge-ACOMPANHANDO { background: rgba(56,189,248,0.1); color: #38bdf8; border: 1px solid rgba(56,189,248,0.15); }
+        .badge-CONCLUIDA { background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid rgba(52,211,153,0.15); }
+        .badge-PAUSADA, .badge-RETOMANDO_DEPOIS { background: rgba(251,191,36,0.1); color: var(--yellow); border: 1px solid rgba(251,191,36,0.15); }
+        .badge-DROPADA { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.15); }
+        .actions { display: flex; gap: 8px; align-items: center; }
+        .btn-action {
+          padding: 6px 13px; border-radius: 7px;
+          font-family: inherit; font-size: 0.8em; font-weight: 600;
+          cursor: pointer; border: none; transition: all 0.2s;
+        }
+        .btn-edit { background: rgba(139,92,246,0.12); color: var(--primary-light); border: 1px solid rgba(139,92,246,0.2); }
+        .btn-edit:hover { background: rgba(139,92,246,0.22); }
+        .btn-del { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.18); }
+        .btn-del:hover { background: rgba(248,113,113,0.2); }
+        .btn-fav { background: none; border: none; font-size: 1.25em; cursor: pointer; margin-left: auto; transition: transform 0.15s; }
+        .btn-fav:hover { transform: scale(1.25); }
+
+        .empty { text-align: center; padding: 70px 20px; color: var(--text-muted); }
+        .empty .icon { font-size: 3.5em; margin-bottom: 14px; }
+
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; align-items: center; justify-content: center; }
+        .overlay.open { display: flex; }
+        .modal {
+          background: var(--bg2); border: 1px solid var(--border);
+          border-radius: var(--radius); padding: 30px;
+          width: 100%; max-width: 460px; margin: 20px;
+        }
+        .modal h2 { font-size: 1.15em; color: var(--primary-light); margin-bottom: 4px; }
+        .modal p { font-size: 0.85em; color: var(--text-muted); margin-bottom: 16px; }
+        .preview {
+          background: var(--bg3); border-left: 3px solid var(--primary);
+          border-radius: 6px; padding: 10px 14px; margin-bottom: 20px;
+        }
+        .preview h3 { font-size: 0.9em; margin-bottom: 2px; }
+        .preview span { font-family: 'Noto Sans KR', sans-serif; font-size: 0.78em; color: var(--text-muted); }
+        .current-val {
+          background: rgba(251,191,36,0.07); border-left: 3px solid var(--yellow);
+          border-radius: 6px; padding: 7px 12px; font-size: 0.82em;
+          color: var(--yellow); margin-bottom: 8px;
+        }
+        .form-group { margin-bottom: 16px; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 22px; }
+        .btn-save {
+          flex: 1; padding: 11px; background: linear-gradient(135deg, var(--green), #059669);
+          border: none; border-radius: 8px; color: #fff;
+          font-family: inherit; font-weight: 700; cursor: pointer;
+        }
+        .btn-cancel {
+          flex: 1; padding: 11px; background: var(--bg3);
+          border: 1px solid var(--border); border-radius: 8px;
+          color: var(--text-muted); font-family: inherit; font-weight: 600; cursor: pointer;
+        }
+
+        .toast {
+          position: fixed; bottom: 28px; right: 28px;
+          background: var(--bg2); border: 1px solid var(--primary);
+          border-radius: 10px; padding: 13px 20px;
+          color: var(--text); font-weight: 600; font-size: 0.9em;
+          z-index: 200; opacity: 0; transform: translateY(20px);
+          transition: all 0.3s; pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.err { border-color: var(--red); }
+
+        @media (max-width: 600px) {
+          header h1 { font-size: 1.9em; }
+          .filters { flex-direction: column; }
+          .btn-clear { margin-left: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <h1>Chaekgalpi</h1>
+        <p>Gerencie suas leituras de novels coreanas</p>
+        <div class="header-stats">
+            <div class="stat-pill"><span class="num" id="sTotal">0</span><span class="lbl">Novels</span></div>
+            <div class="stat-pill"><span class="num" id="sChapters">0</span><span class="lbl">Capítulos</span></div>
+            <div class="stat-pill"><span class="num" id="sAvg">0</span><span class="lbl">Média</span></div>
+        </div>
+    </header>
+
+    <div class="stats-link">
+        <a href="estatisticas.html" class="btn-stats">📊 Ver Estatísticas Detalhadas</a>
+    </div>
+
+    <div class="card">
+        <div class="card-title">➕ Adicionar Nova Novel</div>
+        <div class="form-grid">
+            <div>
+                <label>Nome em Inglês</label>
+                <input type="text" id="fNameEng" placeholder="Ex: Solo Leveling...">
+            </div>
+            <div>
+                <label>Nome em Coreano</label>
+                <input type="text" id="fNameKor" placeholder="Ex: 나 혼자만...">
+            </div>
+            <div>
+                <label>Autor</label>
+                <input type="text" id="fAuthor" placeholder="Nome do autor">
+            </div>
+            <div>
+                <label>Capítulo</label>
+                <input type="number" id="fChapter" placeholder="0" min="0">
+            </div>
+            <div>
+                <label>Status</label>
+                <select id="fStatus">
+                    <option value="">Selecione...</option>
+                    <option value="ACOMPANHANDO">📖 Acompanhando</option>
+                    <option value="CONCLUIDA">✅ Concluída</option>
+                    <option value="PAUSADA">⏸️ Pausada</option>
+                    <option value="RETOMANDO_DEPOIS">🔄 Retomando depois</option>
+                    <option value="DROPADA">❌ Dropada</option>
+                </select>
+            </div>
+            <div style="display:flex;align-items:flex-end;">
+                <button class="btn-add" onclick="adicionar()">Adicionar</button>
+            </div>
+        </div>
+    </div>
+
+    <input type="text" class="search-input" id="busca" placeholder="🔍 Buscar novel por nome..." oninput="filtrar()">
+
+    <div class="filters">
+        <div class="filter-g">
+            <label>📊 Status</label>
+            <select id="fFiltroStatus" onchange="filtrar()">
+                <option value="">Todos</option>
+                <option value="ACOMPANHANDO">📖 Acompanhando</option>
+                <option value="CONCLUIDA">✅ Concluída</option>
+                <option value="PAUSADA">⏸️ Pausada</option>
+                <option value="RETOMANDO_DEPOIS">🔄 Retomando depois</option>
+                <option value="DROPADA">❌ Dropada</option>
+            </select>
+        </div>
+        <div class="filter-g">
+            <label>⭐ Favoritos</label>
+            <select id="fFiltroFav" onchange="filtrar()">
+                <option value="">Todos</option>
+                <option value="true">Apenas Favoritos</option>
+                <option value="false">Não Favoritos</option>
+            </select>
+        </div>
+        <div class="filter-g">
+            <label>🔄 Ordenar por</label>
+            <select id="fOrdem" onchange="filtrar()">
+                <option value="az">Nome (A-Z)</option>
+                <option value="za">Nome (Z-A)</option>
+                <option value="capDesc">Capítulos (Maior)</option>
+                <option value="capAsc">Capítulos (Menor)</option>
+                <option value="fav">Favoritos Primeiro</option>
+            </select>
+        </div>
+        <button class="btn-clear" onclick="limpar()">🗑️ Limpar Filtros</button>
+    </div>
+
+    <div id="lista"></div>
+
+</div>
+
+<div class="overlay" id="overlay">
+    <div class="modal">
+        <h2>✏️ Atualizar Novel</h2>
+        <p>Modifique os dados da novel</p>
+        <input type="hidden" id="mId">
+        <div class="preview">
+            <h3 id="mEng"></h3>
+            <span id="mKor"></span>
+        </div>
+        <div class="form-group">
+            <label>📖 Capítulo</label>
+            <div class="current-val" id="mAtualCap"></div>
+            <input type="number" id="mChapter" min="0">
+        </div>
+        <div class="form-group">
+            <label>📊 Status</label>
+            <div class="current-val" id="mAtualStatus"></div>
+            <select id="mStatus">
+                <option value="ACOMPANHANDO">📖 Acompanhando</option>
+                <option value="CONCLUIDA">✅ Concluída</option>
+                <option value="PAUSADA">⏸️ Pausada</option>
+                <option value="RETOMANDO_DEPOIS">🔄 Retomando depois</option>
+                <option value="DROPADA">❌ Dropada</option>
+            </select>
+        </div>
+        <div class="modal-btns">
+            <button class="btn-save" onclick="salvar()">💾 Salvar</button>
+            <button class="btn-cancel" onclick="fechar()">↩️ Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const API = 'http://localhost:8080/novels';
+    const AUTH = 'Basic ' + btoa('admin:1234');
+    let novels = [];
+
+    const statusLabel = {
+      ACOMPANHANDO: '📖 Acompanhando',
+      CONCLUIDA: '✅ Concluída',
+      PAUSADA: '⏸️ Pausada',
+      RETOMANDO_DEPOIS: '🔄 Retomando depois',
+      DROPADA: '❌ Dropada'
+    };
+
+    async function carregar() {
+      try {
+        const r = await fetch(API, { headers: { Authorization: AUTH } });
+        novels = await r.json();
+        atualizarStats();
+        filtrar();
+      } catch(e) {
+        document.getElementById('lista').innerHTML = `<div class="empty"><div class="icon">⚠️</div><p>Erro ao conectar com a API.<br>Verifique se o Spring está rodando.</p></div>`;
+      }
+    }
+
+    function atualizarStats() {
+      const total = novels.length;
+      const caps = novels.reduce((s, n) => s + (n.chapter || 0), 0);
+      document.getElementById('sTotal').textContent = total;
+      document.getElementById('sChapters').textContent = caps.toLocaleString('pt-BR');
+      document.getElementById('sAvg').textContent = total > 0 ? (caps / total).toFixed(1) : '0';
+    }
+
+    function filtrar() {
+      const busca = document.getElementById('busca').value.toLowerCase();
+      const status = document.getElementById('fFiltroStatus').value;
+      const fav = document.getElementById('fFiltroFav').value;
+      const ordem = document.getElementById('fOrdem').value;
+
+      let lista = novels.filter(n => {
+        const nome = ((n.nameEng || '') + ' ' + (n.nameKor || '')).toLowerCase();
+        if (busca && !nome.includes(busca)) return false;
+        if (status && n.status !== status) return false;
+        if (fav !== '' && String(n.favorito) !== fav) return false;
+        return true;
+      });
+
+      lista.sort((a, b) => {
+        if (ordem === 'az') return (a.nameEng || '').localeCompare(b.nameEng || '');
+        if (ordem === 'za') return (b.nameEng || '').localeCompare(a.nameEng || '');
+        if (ordem === 'capDesc') return (b.chapter || 0) - (a.chapter || 0);
+        if (ordem === 'capAsc') return (a.chapter || 0) - (b.chapter || 0);
+        if (ordem === 'fav') return (b.favorito ? 1 : 0) - (a.favorito ? 1 : 0);
+        return 0;
+      });
+
+      renderizar(lista);
+    }
+
+    function renderizar(lista) {
+      const el = document.getElementById('lista');
+      if (lista.length === 0) {
+        el.innerHTML = `<div class="empty"><div class="icon">📚</div><p>Nenhuma novel encontrada.</p></div>`;
+        return;
+      }
+      el.innerHTML = `<div class="novels-grid">${lista.map((n, i) => `
+        <div class="novel-card">
+          <div class="novel-num">#${i + 1}</div>
+          <div class="novel-eng">${esc(n.nameEng || '')}</div>
+          <div class="novel-kor">${esc(n.nameKor || '')}</div>
+          <div class="badges">
+            <span class="badge badge-chapter">Cap. ${(n.chapter || 0).toLocaleString('pt-BR')}</span>
+            <span class="badge badge-${n.status || ''}">${statusLabel[n.status] || n.status || ''}</span>
+          </div>
+          <div class="actions">
+            <button class="btn-action btn-edit" onclick="abrirModal(${n.id})">✏️ Atualizar</button>
+            <button class="btn-action btn-del" onclick="deletar(${n.id})">🗑️ Excluir</button>
+            <button class="btn-fav" onclick="favoritar(${n.id})">${n.favorito ? '⭐' : '☆'}</button>
+          </div>
+        </div>`).join('')}</div>`;
+    }
+
+    async function adicionar() {
+      const nameEng = document.getElementById('fNameEng').value.trim();
+      const nameKor = document.getElementById('fNameKor').value.trim();
+      const author  = document.getElementById('fAuthor').value.trim();
+      const chapterRaw = document.getElementById('fChapter').value;
+      const chapter = chapterRaw === '' ? 0 : parseInt(chapterRaw, 10);
+      const status  = document.getElementById('fStatus').value;
+
+      if (!nameEng || !status) { toast('Preencha pelo menos o nome e o status!', true); return; }
+
+      try {
+        const resp = await fetch(API, {
+          method: 'POST',
+          headers: { Authorization: AUTH, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nameEng, nameKor, author, chapter, status, favorito: false, usuario: { id: 1 } })
+        });
+        if (!resp.ok) { toast('Erro ao adicionar: ' + resp.status, true); return; }
+        document.getElementById('fNameEng').value = '';
+        document.getElementById('fNameKor').value = '';
+        document.getElementById('fAuthor').value = '';
+        document.getElementById('fChapter').value = '';
+        document.getElementById('fStatus').value = '';
+        toast('Novel adicionada! ✅');
+        carregar();
+      } catch(e) { toast('Erro ao adicionar', true); }
+    }
+
+    async function deletar(id) {
+      if (!confirm('Tem certeza que deseja remover esta novel?')) return;
+      await fetch(`${API}/${id}`, { method: 'DELETE', headers: { Authorization: AUTH } });
+      toast('Novel removida!');
+      carregar();
+    }
+
+    async function favoritar(id) {
+      await fetch(`${API}/${id}/favoritar`, { method: 'PATCH', headers: { Authorization: AUTH } });
+      carregar();
+    }
+
+    function abrirModal(id) {
+      const n = novels.find(x => x.id === id);
+      if (!n) return;
+      document.getElementById('mId').value = id;
+      document.getElementById('mEng').textContent = n.nameEng || '';
+      document.getElementById('mKor').textContent = n.nameKor || '';
+      document.getElementById('mAtualCap').textContent = `ℹ️ Capítulo atual: ${n.chapter || 0}`;
+      document.getElementById('mAtualStatus').textContent = `ℹ️ Status atual: ${statusLabel[n.status] || n.status}`;
+      document.getElementById('mChapter').value = n.chapter || 0;
+      document.getElementById('mStatus').value = n.status || 'ACOMPANHANDO';
+      document.getElementById('overlay').classList.add('open');
+    }
+
+    function fechar() { document.getElementById('overlay').classList.remove('open'); }
+
+    async function salvar() {
+      const id = document.getElementById('mId').value;
+      const n = novels.find(x => x.id == id);
+      const chapterRaw = document.getElementById('mChapter').value;
+      const chapter = chapterRaw === '' ? 0 : parseInt(chapterRaw, 10);
+      const status = document.getElementById('mStatus').value;
+      try {
+        await fetch(`${API}/${id}`, {
+          method: 'PUT',
+          headers: { Authorization: AUTH, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...n, chapter, status })
+        });
+        fechar();
+        toast('Novel atualizada! ✅');
+        carregar();
+      } catch(e) { toast('Erro ao salvar', true); }
+    }
+
+    function limpar() {
+      document.getElementById('busca').value = '';
+      document.getElementById('fFiltroStatus').value = '';
+      document.getElementById('fFiltroFav').value = '';
+      document.getElementById('fOrdem').value = 'az';
+      filtrar();
+    }
+
+    function toast(msg, err = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show' + (err ? ' err' : '');
+      setTimeout(() => t.className = 'toast', 3000);
+    }
+
+    function esc(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    document.getElementById('overlay').addEventListener('click', e => {
+      if (e.target.id === 'overlay') fechar();
+    });
+
+    carregar();
+</script>
+</body>
+</html>
