@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chaekgalpi - Detalhes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+          --bg: #0d0d14; --bg2: #13131f; --bg3: #1a1a2a;
+          --border: rgba(255,255,255,0.07);
+          --primary: #8b5cf6; --primary-light: #a78bfa;
+          --secondary: #38bdf8; --text: #e2e2ef;
+          --text-muted: #6b6b8a; --radius: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+          background: var(--bg); color: var(--text);
+          font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh;
+        }
+
+        /* Luz de fundo igual ao index */
+        body::before {
+          content: ''; position: fixed; inset: 0;
+          background: radial-gradient(ellipse at 15% 0%, rgba(139,92,246,0.12) 0%, transparent 50%);
+          pointer-events: none; z-index: 0;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 1; }
+
+        .back-link {
+            display: inline-block; margin-bottom: 24px;
+            color: var(--primary-light); text-decoration: none;
+            font-weight: 600; font-size: 0.9em; transition: 0.2s;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
+
+        /* Header Card */
+        .novel-header {
+            display: grid; grid-template-columns: 240px 1fr; gap: 40px;
+            background: var(--bg2); border: 1px solid var(--border);
+            padding: 30px; border-radius: var(--radius);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+
+        .cover-wrapper {
+            width: 100%; height: 340px; background: var(--bg3);
+            border-radius: 12px; overflow: hidden; border: 1px solid var(--border);
+        }
+        .cover-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+
+        .novel-info h1 {
+            font-size: 2.2em; font-weight: 800; margin-bottom: 8px;
+            background: linear-gradient(135deg, #fff 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .novel-kor { font-family: 'Noto Sans KR'; color: var(--text-muted); font-size: 1.1em; margin-bottom: 20px; }
+
+        .stats-row { display: flex; gap: 15px; margin-bottom: 25px; }
+        .stat-item { background: var(--bg3); padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border); flex: 1; }
+        .stat-item span { font-size: 0.7em; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .stat-item b { color: var(--secondary); font-size: 1.1em; display: block; margin-top: 2px; }
+
+        /* Estrelas */
+        .stars { font-size: 2em; display: flex; gap: 8px; margin-top: 10px; }
+        .star { cursor: pointer; color: #2a2a3a; transition: all 0.2s; }
+        .star.active { color: #fbbf24; text-shadow: 0 0 15px rgba(251,191,36,0.4); }
+        .star:hover { transform: scale(1.2); }
+
+        /* Inputs e Cards */
+        .content-card {
+            margin-top: 25px; background: var(--bg2);
+            border: 1px solid var(--border); border-radius: var(--radius); padding: 30px;
+        }
+        .section-title {
+            font-size: 1.1em; font-weight: 700; color: var(--primary-light);
+            margin-bottom: 15px; display: flex; align-items: center; gap: 10px;
+        }
+
+        input[type="text"], textarea {
+            width: 100%; background: var(--bg3); border: 1px solid var(--border);
+            border-radius: 10px; color: var(--text); padding: 15px;
+            font-family: inherit; font-size: 0.95em; outline: none; transition: 0.2s;
+        }
+        input[type="text"]:focus, textarea:focus { border-color: var(--primary); }
+
+        textarea { min-height: 140px; resize: vertical; margin-bottom: 20px; }
+
+        .btn-save {
+            background: linear-gradient(135deg, var(--primary), #6366f1);
+            color: white; border: none; padding: 14px 30px;
+            border-radius: 10px; font-weight: 700; cursor: pointer;
+            width: 100%; font-size: 1em; transition: 0.3s;
+        }
+        .btn-save:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(139,92,246,0.3); }
+
+        .resenha-view {
+            background: rgba(139,92,246,0.06); border-left: 4px solid var(--primary);
+            padding: 20px; border-radius: 8px; margin-bottom: 25px;
+            line-height: 1.6; font-style: italic; color: #d1d1e0;
+        }
+
+        @media (max-width: 768px) {
+            .novel-header { grid-template-columns: 1fr; text-align: center; }
+            .cover-wrapper { width: 180px; height: 260px; margin: 0 auto; }
+            .stats-row { flex-wrap: wrap; }
+            .stars { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="index.html" class="back-link">← Voltar para a estante</a>
+
+    <div class="novel-header">
+        <div class="cover-wrapper">
+            <img id="cover" src="" alt="Capa da Novel">
+        </div>
+        <div class="novel-info">
+            <h1 id="title">Carregando...</h1>
+            <div id="nameKor" class="novel-kor"></div>
+
+            <div class="stats-row">
+                <div class="stat-item"><span>Capítulo</span><b id="chapter">0</b></div>
+                <div class="stat-item"><span>Status</span><b id="status">-</b></div>
+                <div class="stat-item"><span>Autor</span><b id="author">-</b></div>
+            </div>
+
+            <div class="rating-box">
+                <label style="font-size: 0.75em; color: var(--text-muted); font-weight: 700;">SUA NOTA</label>
+                <div class="stars" id="starBox">
+                    <span class="star" data-v="1">★</span>
+                    <span class="star" data-v="2">★</span>
+                    <span class="star" data-v="3">★</span>
+                    <span class="star" data-v="4">★</span>
+                    <span class="star" data-v="5">★</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-card">
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div class="section-title" style="margin: 0;">✍️ Minha Resenha</div>
+            <button onclick="toggleLink()" style="background: none; border: none; color: var(--text-muted); font-size: 0.7em; cursor: pointer; text-decoration: underline;">
+                Editar Link da Capa
+            </button>
+        </div>
+
+        <div id="linkArea" style="display: none; margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
+            <label style="font-size: 0.7em; color: var(--primary-light); display: block; margin-bottom: 5px; font-weight: 700;">🔗 LINK DA IMAGEM</label>
+            <input type="text" id="coverInput" placeholder="https://..." style="width: 100%;">
+        </div>
+
+        <div id="resenhaDisplay" class="resenha-view" style="display: none;"></div>
+        <textarea id="resenhaInput" placeholder="O que você está achando dessa história?"></textarea>
+
+        <button class="btn-save" onclick="salvarTudo()">💾 Salvar Alterações</button>
+    </div>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+    const API = 'http://localhost:8080/novels';
+    const AUTH = 'Basic ' + btoa('admin:1234');
+
+    let currentNovel = {};
+
+    // Função simples para mostrar/esconder o campo do link
+    function toggleLink() {
+        const area = document.getElementById('linkArea');
+        area.style.display = area.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // No seu load(), lembre de preencher o input:
+    // document.getElementById('coverInput').value = currentNovel.cover || '';
+
+    async function salvarTudo() {
+        const novoTexto = document.getElementById('resenhaInput').value;
+        const novoCover = document.getElementById('coverInput').value;
+
+        currentNovel.resenha = novoTexto;
+        currentNovel.cover = novoCover;
+
+        try {
+            const resp = await fetch(`${API}/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': AUTH,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(currentNovel)
+            });
+
+            if(resp.ok) {
+                alert("Salvo! ✨");
+                location.reload();
+            }
+        } catch (e) {
+            alert("Erro ao salvar.");
+        }
+    }
+
+    // 1. Função para transformar o arquivo em texto (Base64)
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    async function load() {
+        if (!id) return;
+        try {
+            const r = await fetch(`${API}/${id}`, { headers: { 'Authorization': AUTH } });
+            if (!r.ok) throw new Error();
+            currentNovel = await r.json();
+
+            document.getElementById('title').textContent = currentNovel.nameEng || 'Sem título';
+            document.getElementById('nameKor').textContent = currentNovel.nameKor || '';
+            document.getElementById('chapter').textContent = currentNovel.chapter || 0;
+            document.getElementById('status').textContent = currentNovel.status || '-';
+            document.getElementById('author').textContent = currentNovel.author || 'Desconhecido';
+
+            // Aqui ele carrega o que estiver no banco (link ou Base64)
+            const coverImg = currentNovel.cover || 'https://via.placeholder.com/240x340?text=Sem+Capa';
+            document.getElementById('cover').src = coverImg;
+
+            if (currentNovel.resenha) {
+                const display = document.getElementById('resenhaDisplay');
+                display.textContent = currentNovel.resenha;
+                display.style.display = 'block';
+                document.getElementById('resenhaInput').value = currentNovel.resenha;
+            }
+            if (currentNovel.rating) highlightStars(currentNovel.rating);
+        } catch (e) {
+            document.getElementById('title').textContent = "Erro ao carregar.";
+        }
+    }
+
+    async function salvarTudo() {
+        const fileInput = document.getElementById('fileInput'); // Referência ao novo input de arquivo
+
+        // Se o usuário selecionou um arquivo, converte. Se não, mantém o que já tinha.
+        if (fileInput && fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            currentNovel.cover = await fileToBase64(file);
+        } else {
+            // Se não subiu arquivo, tenta pegar o que está no input de texto (caso queira usar link)
+            const novoLink = document.getElementById('coverInput').value;
+            if(novoLink) currentNovel.cover = novoLink;
+        }
+
+        currentNovel.resenha = document.getElementById('resenhaInput').value;
+
+        try {
+            const resp = await fetch(`${API}/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': AUTH,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(currentNovel)
+            });
+
+            if(resp.ok) {
+                alert("Salvo com sucesso! 🚀");
+                location.reload();
+            }
+        } catch (e) {
+            alert("Erro ao salvar. Verifique se o banco aceita textos longos (LONGTEXT).");
+        }
+    }
+
+    function highlightStars(rating) {
+        document.querySelectorAll('.star').forEach(s => {
+            s.classList.toggle('active', s.dataset.v <= rating);
+        });
+    }
+
+    document.querySelectorAll('.star').forEach(s => {
+        s.onclick = async () => {
+            const v = parseInt(s.dataset.v);
+            currentNovel.rating = v;
+            await fetch(`${API}/${id}/rating`, {
+                method: 'PUT',
+                headers: { 'Authorization': AUTH, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rating: v })
+            });
+            highlightStars(v);
+        };
+    });
+
+    load();
+</script>
+</body>
+</html>
