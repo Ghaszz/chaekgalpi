@@ -5,285 +5,1046 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chaekgalpi</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <style>
         :root {
-          --bg: #0d0d14;
-          --bg2: #13131f;
-          --bg3: #1a1a2a;
-          --border: rgba(255,255,255,0.07);
-          --primary: #8b5cf6;
-          --primary-light: #a78bfa;
-          --secondary: #38bdf8;
-          --green: #34d399;
-          --red: #f87171;
-          --yellow: #fbbf24;
-          --text: #e2e2ef;
-          --text-muted: #6b6b8a;
-          --radius: 12px;
+            --bg: #0d0d14;
+            --bg2: #13131f;
+            --bg3: #1a1a2a;
+            --border: rgba(255,255,255,0.07);
+            --primary: #8b5cf6;
+            --primary-light: #a78bfa;
+            --secondary: #38bdf8;
+            --green: #34d399;
+            --red: #f87171;
+            --yellow: #fbbf24;
+            --text: #e2e2ef;
+            --text-muted: #6b6b8a;
+            --radius: 12px;
+            --panel-width: 290px;
         }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-          background: var(--bg);
-          color: var(--text);
-          font-family: 'Plus Jakarta Sans', sans-serif;
-          min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
         }
+
         body::before {
-          content: '';
-          position: fixed; inset: 0;
-          background:
-            radial-gradient(ellipse at 15% 0%, rgba(139,92,246,0.12) 0%, transparent 50%),
-            radial-gradient(ellipse at 85% 100%, rgba(56,189,248,0.08) 0%, transparent 50%);
-          pointer-events: none; z-index: 0;
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 15% 0%, rgba(139,92,246,0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 85% 100%, rgba(56,189,248,0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
         }
 
-        .container { max-width: 1100px; margin: 0 auto; padding: 32px 20px; position: relative; z-index: 1; }
+        /* ── Layout ── */
+        .layout { display: flex; min-height: 100vh; }
 
-        header { text-align: center; margin-bottom: 36px; }
+        .main-content {
+            flex: 1;
+            min-width: 0;
+            transition: padding-right 0.35s ease;
+        }
+
+        .main-content.panel-open { padding-right: var(--panel-width); }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 32px 20px 60px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── Painel lateral ── */
+        .side-panel {
+            position: fixed;
+            top: 0; right: 0;
+            width: var(--panel-width);
+            height: 100vh;
+            background: var(--bg2);
+            border-left: 1px solid var(--border);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+            overflow: hidden;
+        }
+
+        .side-panel.visible { transform: translateX(0); }
+
+        .panel-cover {
+            width: 100%;
+            height: 340px;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .panel-cover img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            object-position: top center;
+            position: absolute; inset: 0;
+        }
+
+        .panel-cover-placeholder {
+            width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg3);
+            font-size: 3.5em;
+            font-weight: 800;
+            color: var(--primary-light);
+            opacity: 0.3;
+            letter-spacing: -2px;
+        }
+
+        .panel-cover::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 130px;
+            background: linear-gradient(transparent, var(--bg2));
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .panel-close {
+            position: absolute;
+            top: 10px; right: 10px;
+            z-index: 10;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            width: 30px; height: 30px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 0.8em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .panel-close:hover { background: rgba(0,0,0,0.8); color: var(--text); }
+
+        .panel-body {
+            padding: 18px 20px;
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .panel-title { font-size: 1em; font-weight: 800; line-height: 1.3; }
+
+        .panel-kor {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.78em;
+            color: var(--text-muted);
+            font-weight: 300;
+            margin-top: -4px;
+        }
+
+        .panel-meta { display: flex; flex-direction: column; gap: 7px; margin-top: 2px; }
+
+        .panel-meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 11px;
+            background: var(--bg3);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .panel-meta-row .lbl {
+            font-size: 0.68em;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .panel-meta-row .val { font-size: 0.82em; font-weight: 700; }
+
+        .panel-badge {
+            display: inline-block;
+            padding: 2px 9px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .panel-badge.ACOMPANHANDO { background: rgba(56,189,248,0.1); color: #38bdf8; border: 1px solid rgba(56,189,248,0.15); }
+        .panel-badge.CONCLUIDA    { background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid rgba(52,211,153,0.15); }
+        .panel-badge.PAUSADA, .panel-badge.RETOMANDO_DEPOIS { background: rgba(251,191,36,0.1); color: var(--yellow); border: 1px solid rgba(251,191,36,0.15); }
+        .panel-badge.DROPADA      { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.15); }
+
+        .panel-resenha {
+            background: rgba(139,92,246,0.06);
+            border-left: 3px solid var(--primary);
+            border-radius: 6px;
+            padding: 10px 13px;
+            font-size: 0.8em;
+            line-height: 1.6;
+            color: #c4c4d8;
+            font-style: italic;
+            display: -webkit-box;
+            -webkit-line-clamp: 5;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .panel-actions { display: flex; gap: 8px; margin-top: 4px; }
+
+        .panel-btn {
+            flex: 1;
+            padding: 9px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.8em;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .panel-btn-primary { background: linear-gradient(135deg, var(--primary), #6366f1); color: #fff; }
+        .panel-btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+
+        .panel-btn-ghost { background: var(--bg3); color: var(--text-muted); border: 1px solid var(--border); }
+        .panel-btn-ghost:hover { border-color: rgba(139,92,246,0.3); color: var(--primary-light); }
+
+        /* ── Header ── */
+        header { text-align: center; margin-bottom: 32px; }
+
         header h1 {
-          font-size: 2.6em; font-weight: 800; letter-spacing: -1px;
-          background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary) 100%);
-          -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            font-size: 2.6em;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        header p { color: var(--text-muted); margin-top: 6px; font-size: 0.95em; }
-        .header-stats { display: flex; justify-content: center; gap: 16px; margin-top: 24px; flex-wrap: wrap; }
+
+        header p { color: var(--text-muted); margin-top: 6px; font-size: 0.9em; }
+
+        .header-stats {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
         .stat-pill {
-          background: var(--bg2); border: 1px solid var(--border);
-          border-radius: 40px; padding: 10px 22px; text-align: center;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            padding: 9px 20px;
+            text-align: center;
+            transition: all 0.2s;
         }
+
+        .stat-pill:hover { border-color: rgba(139,92,246,0.25); }
+
         .stat-pill .num {
-          font-size: 1.5em; font-weight: 800; display: block;
-          background: linear-gradient(135deg, var(--primary-light), var(--secondary));
-          -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            font-size: 1.4em;
+            font-weight: 800;
+            display: block;
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .stat-pill .lbl { font-size: 0.75em; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
 
-        .stats-link { text-align: center; margin-bottom: 28px; }
-        .btn-stats {
-          display: inline-block; padding: 10px 24px;
-          background: rgba(139,92,246,0.12); color: var(--primary-light);
-          border: 1px solid rgba(139,92,246,0.25); border-radius: 8px;
-          font-family: inherit; font-weight: 600; font-size: 0.9em;
-          text-decoration: none; cursor: pointer; transition: all 0.2s;
+        .stat-pill .lbl { font-size: 0.7em; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .header-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 18px;
+            flex-wrap: wrap;
         }
-        .btn-stats:hover { background: rgba(139,92,246,0.22); }
 
-        .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
-        .card-title { font-size: 1em; font-weight: 700; color: var(--primary-light); margin-bottom: 18px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
-        label { display: block; font-size: 0.75em; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .btn-ghost-header {
+            padding: 9px 20px;
+            background: rgba(139,92,246,0.1);
+            color: var(--primary-light);
+            border: 1px solid rgba(139,92,246,0.22);
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.88em;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-ghost-header:hover { background: rgba(139,92,246,0.2); }
+
+        /* ── Formulário colapsável ── */
+        .add-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .add-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 22px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .add-card-header:hover { background: rgba(139,92,246,0.05); }
+
+        .add-card-title {
+            font-size: 0.92em;
+            font-weight: 700;
+            color: var(--primary-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-card-chevron { color: var(--text-muted); font-size: 0.75em; transition: transform 0.25s; }
+        .add-card-chevron.open { transform: rotate(180deg); }
+
+        .add-card-body { padding: 0 22px 20px; display: none; }
+        .add-card-body.open { display: block; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.7em;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
         input[type=text], input[type=number], select {
-          width: 100%; padding: 9px 13px;
-          background: var(--bg3); border: 1px solid var(--border);
-          border-radius: 8px; color: var(--text);
-          font-family: inherit; font-size: 0.9em; outline: none;
-          transition: border-color 0.2s;
+            width: 100%;
+            padding: 9px 12px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9em;
+            outline: none;
+            transition: border-color 0.2s;
         }
+
         input[type=text]:focus, input[type=number]:focus, select:focus { border-color: var(--primary); }
         select option { background: #1a1a2e; }
+
         .btn-add {
-          width: 100%; padding: 10px;
-          background: linear-gradient(135deg, var(--primary), #6366f1);
-          border: none; border-radius: 8px; color: #fff;
-          font-family: inherit; font-weight: 700; font-size: 0.95em;
-          cursor: pointer; transition: opacity 0.2s; margin-top: 22px;
+            width: 100%;
+            padding: 11px;
+            background: linear-gradient(135deg, var(--primary), #6366f1);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.2s;
+            margin-top: 16px;
         }
-        .btn-add:hover { opacity: 0.85; }
+
+        .btn-add:hover { opacity: 0.85; transform: translateY(-1px); }
+
+        /* ── Busca ── */
+        .search-wrap { position: relative; margin-bottom: 12px; }
+
+        .search-icon {
+            position: absolute;
+            left: 14px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
 
         .search-input {
-          width: 100%; padding: 11px 16px;
-          background: var(--bg2); border: 1px solid var(--border);
-          border-radius: var(--radius); color: var(--text);
-          font-family: inherit; font-size: 0.95em; outline: none;
-          margin-bottom: 14px; transition: border-color 0.2s;
+            width: 100%;
+            padding: 11px 40px;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.92em;
+            outline: none;
+            transition: border-color 0.2s;
         }
+
         .search-input:focus { border-color: var(--primary); }
-        .filters { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 24px; display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
-        .filter-g { min-width: 140px; }
-        .btn-clear {
-          padding: 9px 16px; background: rgba(248,113,113,0.1); color: var(--red);
-          border: 1px solid rgba(248,113,113,0.2); border-radius: 8px;
-          font-family: inherit; font-weight: 600; font-size: 0.85em;
-          cursor: pointer; margin-left: auto; transition: all 0.2s;
+
+        .search-clear {
+            position: absolute;
+            right: 12px; top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1em;
+            padding: 4px;
+            display: none;
         }
+
+        .search-clear.show { display: block; }
+
+        /* ── Filtros ── */
+        .filters {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 18px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .filter-g { min-width: 120px; }
+
+        .btn-clear {
+            padding: 8px 14px;
+            background: rgba(248,113,113,0.1);
+            color: var(--red);
+            border: 1px solid rgba(248,113,113,0.2);
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.82em;
+            cursor: pointer;
+            margin-left: auto;
+            transition: all 0.2s;
+        }
+
         .btn-clear:hover { background: rgba(248,113,113,0.2); }
 
-        .novels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+        .results-info {
+            font-size: 0.78em;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+        }
+
+        .results-info span { font-weight: 700; color: var(--primary-light); }
+
+        /* ── Grid ── */
+        .novels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+            gap: 13px;
+        }
+
         .novel-card {
-          background: var(--bg2); border: 1px solid var(--border);
-          border-radius: var(--radius); padding: 18px;
-          position: relative; transition: all 0.2s;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            position: relative;
+            transition: all 0.2s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
         }
-        .novel-card:hover { border-color: rgba(139,92,246,0.35); transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.35); }
-        .novel-num { position: absolute; top: 14px; right: 14px; font-size: 0.72em; font-weight: 700; color: var(--text-muted); }
-        .novel-eng { font-size: 0.92em; font-weight: 700; line-height: 1.4; padding-right: 28px; margin-bottom: 4px; }
-        .novel-kor { font-family: 'Noto Sans KR', sans-serif; font-size: 0.8em; color: var(--text-muted); font-weight: 300; margin-bottom: 12px; }
-        .badges { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; }
-        .badge { padding: 3px 10px; border-radius: 20px; font-size: 0.78em; font-weight: 600; }
-        .badge-chapter { background: rgba(56,189,248,0.12); color: var(--secondary); border: 1px solid rgba(56,189,248,0.2); }
+
+        .novel-card:hover {
+            border-color: rgba(139,92,246,0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+        }
+
+        .novel-card.active {
+            border-color: rgba(139,92,246,0.6);
+            background: rgba(139,92,246,0.05);
+        }
+
+        /* tag de recente
+        .novel-card.recently-updated::after {
+            content: 'Atualizado';
+            position: absolute;
+            top: -1px; left: 14px;
+            font-size: 0.58em;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--green);
+            background: rgba(52,211,153,0.1);
+            border: 1px solid rgba(52,211,153,0.2);
+            border-top: none;
+            padding: 2px 8px 3px;
+            border-radius: 0 0 6px 6px;
+        }*/
+
+        .novel-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 5px;
+        }
+
+        .novel-eng {
+            font-size: 0.9em;
+            font-weight: 700;
+            line-height: 1.4;
+            flex: 1;
+        }
+
+        .novel-num {
+            font-size: 0.67em;
+            font-weight: 700;
+            color: var(--text-muted);
+            flex-shrink: 0;
+            padding-left: 8px;
+            padding-top: 2px;
+        }
+
+        .novel-kor {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.76em;
+            color: var(--text-muted);
+            font-weight: 300;
+            margin-bottom: 10px;
+            min-height: 1.1em;
+        }
+
+        .badges {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .badge {
+            padding: 2px 9px;
+            border-radius: 20px;
+            font-size: 0.73em;
+            font-weight: 600;
+        }
+
+        .badge-chapter { background: rgba(56,189,248,0.12); color: var(--secondary); border: 1px solid rgba(56,189,248,0.18); }
         .badge-ACOMPANHANDO { background: rgba(56,189,248,0.1); color: #38bdf8; border: 1px solid rgba(56,189,248,0.15); }
-        .badge-CONCLUIDA { background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid rgba(52,211,153,0.15); }
+        .badge-CONCLUIDA    { background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid rgba(52,211,153,0.15); }
         .badge-PAUSADA, .badge-RETOMANDO_DEPOIS { background: rgba(251,191,36,0.1); color: var(--yellow); border: 1px solid rgba(251,191,36,0.15); }
-        .badge-DROPADA { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.15); }
-        .actions { display: flex; gap: 8px; align-items: center; }
-        .btn-action {
-          padding: 6px 13px; border-radius: 7px;
-          font-family: inherit; font-size: 0.8em; font-weight: 600;
-          cursor: pointer; border: none; transition: all 0.2s;
+        .badge-DROPADA      { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.15); }
+
+        .card-rating { font-size: 0.7em; color: var(--yellow); letter-spacing: 0.5px; }
+        .card-fav    { font-size: 0.82em; }
+
+        .actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(4px);
+            transition: opacity 0.2s, transform 0.2s;
+            margin-top: auto;
+            padding-top: 8px;
         }
+
+        .novel-card:hover .actions,
+        .novel-card.active .actions { opacity: 1; transform: translateY(0); }
+
+        .btn-action {
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.75em;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
         .btn-edit { background: rgba(139,92,246,0.12); color: var(--primary-light); border: 1px solid rgba(139,92,246,0.2); }
         .btn-edit:hover { background: rgba(139,92,246,0.22); }
+
         .btn-del { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.18); }
         .btn-del:hover { background: rgba(248,113,113,0.2); }
-        .btn-fav { background: none; border: none; font-size: 1.25em; cursor: pointer; margin-left: auto; transition: transform 0.15s; }
-        .btn-fav:hover { transform: scale(1.25); }
 
-        .empty { text-align: center; padding: 70px 20px; color: var(--text-muted); }
-        .empty .icon { font-size: 3.5em; margin-bottom: 14px; }
+        .btn-link { background: rgba(56,189,248,0.1); color: var(--secondary); border: 1px solid rgba(56,189,248,0.18); }
+        .btn-link:hover { background: rgba(56,189,248,0.2); }
 
-        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; align-items: center; justify-content: center; }
+        .btn-fav {
+            background: none; border: none;
+            font-size: 1.05em;
+            cursor: pointer;
+            margin-left: auto;
+            transition: transform 0.15s;
+            padding: 4px;
+        }
+
+        .btn-fav:hover { transform: scale(1.3); }
+
+        /* ── Empty ── */
+        .empty { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+        .empty .icon { font-size: 3em; margin-bottom: 12px; }
+
+        /* ── Modal ── */
+        .overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
         .overlay.open { display: flex; }
+
         .modal {
-          background: var(--bg2); border: 1px solid var(--border);
-          border-radius: var(--radius); padding: 30px;
-          width: 100%; max-width: 460px; margin: 20px;
-        }
-        .modal h2 { font-size: 1.15em; color: var(--primary-light); margin-bottom: 4px; }
-        .modal p { font-size: 0.85em; color: var(--text-muted); margin-bottom: 16px; }
-        .preview {
-          background: var(--bg3); border-left: 3px solid var(--primary);
-          border-radius: 6px; padding: 10px 14px; margin-bottom: 20px;
-        }
-        .preview h3 { font-size: 0.9em; margin-bottom: 2px; }
-        .preview span { font-family: 'Noto Sans KR', sans-serif; font-size: 0.78em; color: var(--text-muted); }
-        .current-val {
-          background: rgba(251,191,36,0.07); border-left: 3px solid var(--yellow);
-          border-radius: 6px; padding: 7px 12px; font-size: 0.82em;
-          color: var(--yellow); margin-bottom: 8px;
-        }
-        .form-group { margin-bottom: 16px; }
-        .modal-btns { display: flex; gap: 10px; margin-top: 22px; }
-        .btn-save {
-          flex: 1; padding: 11px; background: linear-gradient(135deg, var(--green), #059669);
-          border: none; border-radius: 8px; color: #fff;
-          font-family: inherit; font-weight: 700; cursor: pointer;
-        }
-        .btn-cancel {
-          flex: 1; padding: 11px; background: var(--bg3);
-          border: 1px solid var(--border); border-radius: 8px;
-          color: var(--text-muted); font-family: inherit; font-weight: 600; cursor: pointer;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            width: 100%;
+            max-width: 460px;
+            margin: 20px;
         }
 
-        .toast {
-          position: fixed; bottom: 28px; right: 28px;
-          background: var(--bg2); border: 1px solid var(--primary);
-          border-radius: 10px; padding: 13px 20px;
-          color: var(--text); font-weight: 600; font-size: 0.9em;
-          z-index: 200; opacity: 0; transform: translateY(20px);
-          transition: all 0.3s; pointer-events: none;
+        .modal h2 { font-size: 1.1em; color: var(--primary-light); margin-bottom: 4px; }
+        .modal > p { font-size: 0.83em; color: var(--text-muted); margin-bottom: 16px; }
+
+        .preview {
+            background: var(--bg3);
+            border-left: 3px solid var(--primary);
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-bottom: 18px;
         }
+
+        .preview h3 { font-size: 0.88em; margin-bottom: 2px; }
+        .preview span { font-family: 'Noto Sans KR', sans-serif; font-size: 0.76em; color: var(--text-muted); }
+
+        .current-val {
+            background: rgba(251,191,36,0.07);
+            border-left: 3px solid var(--yellow);
+            border-radius: 6px;
+            padding: 6px 11px;
+            font-size: 0.8em;
+            color: var(--yellow);
+            margin-bottom: 7px;
+        }
+
+        .form-group { margin-bottom: 14px; }
+
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+
+        .btn-save {
+            flex: 1; padding: 11px;
+            background: linear-gradient(135deg, var(--green), #059669);
+            border: none; border-radius: 8px;
+            color: #fff; font-family: inherit; font-weight: 700; cursor: pointer;
+        }
+
+        .btn-cancel {
+            flex: 1; padding: 11px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-muted); font-family: inherit; font-weight: 600; cursor: pointer;
+        }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            bottom: 28px; right: 28px;
+            background: var(--bg2);
+            border: 1px solid var(--primary);
+            border-radius: 10px;
+            padding: 12px 20px;
+            color: var(--text);
+            font-weight: 600;
+            font-size: 0.88em;
+            z-index: 200;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: all 0.3s;
+            pointer-events: none;
+        }
+
         .toast.show { opacity: 1; transform: translateY(0); }
         .toast.err { border-color: var(--red); }
 
-        @media (max-width: 600px) {
-          header h1 { font-size: 1.9em; }
-          .filters { flex-direction: column; }
-          .btn-clear { margin-left: 0; width: 100%; }
+        /* ── Paginação ── */
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 28px;
+            padding-bottom: 20px;
+            align-items: center;
         }
+
+        .btn-page {
+            padding: 8px 18px;
+            background: rgba(139,92,246,0.1);
+            color: var(--primary-light);
+            border: 1px solid rgba(139,92,246,0.22);
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-page:hover:not(:disabled) { background: rgba(139,92,246,0.2); }
+        .btn-page:disabled { opacity: 0.3; cursor: not-allowed; }
+        .page-info { font-weight: 700; color: var(--text-muted); font-size: 0.85em; }
+
+        /* ── Responsivo ── */
+        @media (max-width: 768px) {
+            .side-panel { display: none; }
+            .main-content.panel-open { padding-right: 0; }
+        }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.9em; }
+            .filters { flex-direction: column; }
+            .btn-clear { margin-left: 0; width: 100%; }
+            .novels-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ── Modal de confirmação de delete ── */
+        .confirm-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 150;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .confirm-overlay.open {
+            display: flex;
+            animation: fadeInConfirm 0.18s ease;
+        }
+
+        @keyframes fadeInConfirm {
+            from { opacity: 0; } to { opacity: 1; }
+        }
+
+        .confirm-modal {
+            background: var(--bg2);
+            border: 1px solid rgba(248,113,113,0.2);
+            border-radius: var(--radius);
+            padding: 28px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+            animation: slideUpConfirm 0.22s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        @keyframes slideUpConfirm {
+            from { opacity: 0; transform: translateY(16px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .confirm-icon {
+            width: 44px; height: 44px;
+            background: rgba(248,113,113,0.1);
+            border: 1px solid rgba(248,113,113,0.2);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3em; margin-bottom: 16px;
+        }
+
+        .confirm-title { font-size: 1em; font-weight: 800; margin-bottom: 6px; }
+
+        .confirm-desc {
+            font-size: 0.83em; color: var(--text-muted);
+            line-height: 1.55; margin-bottom: 10px;
+        }
+
+        .confirm-novel-name {
+            font-size: 0.82em; font-weight: 700;
+            color: var(--red);
+            background: rgba(248,113,113,0.07);
+            border: 1px solid rgba(248,113,113,0.15);
+            border-radius: 6px;
+            padding: 7px 12px; margin-bottom: 20px;
+            display: block;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        .confirm-input-label {
+            font-size: 0.72em; font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.5px;
+            display: block; margin-bottom: 7px;
+        }
+
+        .confirm-input-label code {
+            color: var(--red);
+            font-family: monospace; font-size: 1.15em;
+            text-transform: none; letter-spacing: 0;
+            background: rgba(248,113,113,0.08);
+            padding: 1px 5px; border-radius: 4px;
+        }
+
+        .confirm-type-input {
+            width: 100%;
+            padding: 10px 13px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: monospace; font-size: 0.95em;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+            margin-bottom: 18px;
+        }
+
+        .confirm-type-input:focus { border-color: rgba(248,113,113,0.35); }
+        .confirm-type-input.valid {
+            border-color: var(--red);
+            background: rgba(248,113,113,0.05);
+        }
+
+        .confirm-btns { display: flex; gap: 10px; }
+
+        .btn-cancel-confirm {
+            flex: 1; padding: 11px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-family: inherit; font-weight: 600; font-size: 0.88em;
+            cursor: pointer; transition: all 0.2s;
+        }
+
+        .btn-cancel-confirm:hover {
+            border-color: rgba(255,255,255,0.12); color: var(--text);
+        }
+
+        .btn-confirm-delete {
+            flex: 1; padding: 11px;
+            background: rgba(248,113,113,0.08);
+            border: 1px solid rgba(248,113,113,0.15);
+            border-radius: 8px;
+            color: rgba(248,113,113,0.35);
+            font-family: inherit; font-weight: 700; font-size: 0.88em;
+            cursor: not-allowed; transition: all 0.25s;
+        }
+
+        .btn-confirm-delete.enabled {
+            background: rgba(248,113,113,0.12);
+            border-color: rgba(248,113,113,0.3);
+            color: var(--red); cursor: pointer;
+        }
+
+        .btn-confirm-delete.enabled:hover {
+            background: rgba(248,113,113,0.22);
+            border-color: rgba(248,113,113,0.5);
+            transform: translateY(-1px);
+        }
+
+        .btn-confirm-delete.enabled:active { transform: translateY(0); }
     </style>
 </head>
+
 <body>
-<div class="container">
+<div class="layout">
 
-    <header>
-        <h1>Chaekgalpi</h1>
-        <p>Gerencie suas leituras de novels coreanas</p>
-        <div class="header-stats">
-            <div class="stat-pill"><span class="num" id="sTotal">0</span><span class="lbl">Novels</span></div>
-            <div class="stat-pill"><span class="num" id="sChapters">0</span><span class="lbl">Capítulos</span></div>
-            <div class="stat-pill"><span class="num" id="sAvg">0</span><span class="lbl">Média</span></div>
+    <div class="main-content" id="mainContent">
+        <div class="container">
+
+            <!-- Header -->
+            <header>
+                <h1>Chaekgalpi</h1>
+                <p>Gerencie suas leituras de novels coreanas</p>
+                <div class="header-stats">
+                    <div class="stat-pill">
+                        <span class="num" id="sTotal">0</span>
+                        <span class="lbl">Novels</span>
+                    </div>
+                    <div class="stat-pill">
+                        <span class="num" id="sChapters">0</span>
+                        <span class="lbl">Capítulos</span>
+                    </div>
+                    <div class="stat-pill">
+                        <span class="num" id="sAvg">0</span>
+                        <span class="lbl">Média/Novel</span>
+                    </div>
+                    <div class="stat-pill">
+                        <span class="num" id="sFavs">0</span>
+                        <span class="lbl">Favoritas</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <a href="estatisticas.html" class="btn-ghost-header">📊 Estatísticas</a>
+                    <button class="btn-ghost-header" onclick="toggleAddCard()">➕ Adicionar Novel</button>
+                </div>
+            </header>
+
+            <!-- Formulário colapsável -->
+            <div class="add-card" id="addCard">
+                <div class="add-card-header" onclick="toggleAddCard()">
+                    <div class="add-card-title">➕ Adicionar Nova Novel</div>
+                    <span class="add-card-chevron" id="addChevron">▼</span>
+                </div>
+                <div class="add-card-body" id="addCardBody">
+                    <div class="form-grid">
+                        <div>
+                            <label>Nome em Inglês</label>
+                            <input type="text" id="fNameEng" placeholder="Ex: Solo Leveling...">
+                        </div>
+                        <div>
+                            <label>Nome em Coreano</label>
+                            <input type="text" id="fNameKor" placeholder="나 혼자만...">
+                        </div>
+                        <div>
+                            <label>Autor</label>
+                            <input type="text" id="fAuthor" placeholder="Nome do autor">
+                        </div>
+                        <div>
+                            <label>Capítulo</label>
+                            <input type="number" id="fChapter" placeholder="0" min="0">
+                        </div>
+                        <div>
+                            <label>Status</label>
+                            <select id="fStatus">
+                                <option value="">Selecione...</option>
+                                <option value="ACOMPANHANDO">📖 Acompanhando</option>
+                                <option value="CONCLUIDA">✅ Concluída</option>
+                                <option value="PAUSADA">⏸️ Pausada</option>
+                                <option value="RETOMANDO_DEPOIS">🔄 Retomando depois</option>
+                                <option value="DROPADA">❌ Dropada</option>
+                            </select>
+                        </div>
+                        <div style="display:flex; align-items:flex-end;">
+                            <button class="btn-add" onclick="adicionar()">Adicionar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Busca -->
+            <div class="search-wrap">
+                <input type="text" class="search-input" id="busca"
+                       placeholder="Buscar por nome, autor ou nome coreano... (Ctrl+K)"
+                       oninput="onBusca()">
+                <button class="search-clear" id="searchClear" onclick="limparBusca()">✕</button>
+            </div>
+
+            <!-- Filtros -->
+            <div class="filters">
+                <div class="filter-g">
+                    <label>📊 Status</label>
+                    <select id="fFiltroStatus" onchange="filtrar()">
+                        <option value="">Todos</option>
+                        <option value="ACOMPANHANDO">📖 Acompanhando</option>
+                        <option value="CONCLUIDA">✅ Concluída</option>
+                        <option value="PAUSADA">⏸️ Pausada</option>
+                        <option value="RETOMANDO_DEPOIS">🔄 Retomando depois</option>
+                        <option value="DROPADA">❌ Dropada</option>
+                    </select>
+                </div>
+                <div class="filter-g">
+                    <label>❤️ Favoritos</label>
+                    <select id="fFiltroFav" onchange="filtrar()">
+                        <option value="">Todos</option>
+                        <option value="true">Apenas Favoritos</option>
+                        <option value="false">Não Favoritos</option>
+                    </select>
+                </div>
+                <div class="filter-g">
+                    <label>⭐ Nota</label>
+                    <select id="fFiltroRating" onchange="filtrar()">
+                        <option value="">Qualquer</option>
+                        <option value="5">★★★★★ Nota 5</option>
+                        <option value="4">★★★★☆ Nota 4+</option>
+                        <option value="3">★★★☆☆ Nota 3+</option>
+                        <option value="0">Sem nota</option>
+                    </select>
+                </div>
+                <div class="filter-g">
+                    <label>🔄 Ordenar</label>
+                    <select id="fOrdem" onchange="filtrar()">
+                        <option value="recente">Última modificação</option>
+                        <option value="adicionado">Data de adição</option>
+                        <option value="az">Nome (A–Z)</option>
+                        <option value="za">Nome (Z–A)</option>
+                        <option value="capDesc">Capítulos (Maior)</option>
+                        <option value="capAsc">Capítulos (Menor)</option>
+                        <option value="rating">Melhor nota</option>
+                        <option value="fav">Favoritos Primeiro</option>
+                    </select>
+                </div>
+                <button class="btn-clear" onclick="limpar()">🗑️ Limpar</button>
+            </div>
+
+            <div class="results-info" id="resultsInfo"></div>
+
+            <div id="lista"></div>
+
         </div>
-    </header>
-
-    <div class="stats-link">
-        <a href="estatisticas.html" class="btn-stats">📊 Ver Estatísticas Detalhadas</a>
     </div>
 
-    <div class="card">
-        <div class="card-title">➕ Adicionar Nova Novel</div>
-        <div class="form-grid">
-            <div>
-                <label>Nome em Inglês</label>
-                <input type="text" id="fNameEng" placeholder="Ex: Solo Leveling...">
-            </div>
-            <div>
-                <label>Nome em Coreano</label>
-                <input type="text" id="fNameKor" placeholder="Ex: 나 혼자만...">
-            </div>
-            <div>
-                <label>Autor</label>
-                <input type="text" id="fAuthor" placeholder="Nome do autor">
-            </div>
-            <div>
-                <label>Capítulo</label>
-                <input type="number" id="fChapter" placeholder="0" min="0">
-            </div>
-            <div>
-                <label>Status</label>
-                <select id="fStatus">
-                    <option value="">Selecione...</option>
-                    <option value="ACOMPANHANDO">📖 Acompanhando</option>
-                    <option value="CONCLUIDA">✅ Concluída</option>
-                    <option value="PAUSADA">⏸️ Pausada</option>
-                    <option value="RETOMANDO_DEPOIS">🔄 Retomando depois</option>
-                    <option value="DROPADA">❌ Dropada</option>
-                </select>
-            </div>
-            <div style="display:flex;align-items:flex-end;">
-                <button class="btn-add" onclick="adicionar()">Adicionar</button>
-            </div>
+    <!-- Painel lateral -->
+    <div class="side-panel" id="sidePanel">
+        <div class="panel-cover" id="panelCover">
+            <div class="panel-cover-placeholder" id="panelPlaceholder"></div>
+            <img id="panelImg" src="" alt="" style="display:none;">
+            <button class="panel-close" onclick="fecharPainel()">✕</button>
+        </div>
+        <div class="panel-body">
+            <div class="panel-title" id="panelTitle"></div>
+            <div class="panel-kor" id="panelKor"></div>
+            <div class="panel-meta" id="panelMeta"></div>
+            <div class="panel-resenha" id="panelResenha" style="display:none;"></div>
+            <div class="panel-actions" id="panelActions"></div>
         </div>
     </div>
-
-    <input type="text" class="search-input" id="busca" placeholder="🔍 Buscar novel por nome..." oninput="filtrar()">
-
-    <div class="filters">
-        <div class="filter-g">
-            <label>📊 Status</label>
-            <select id="fFiltroStatus" onchange="filtrar()">
-                <option value="">Todos</option>
-                <option value="ACOMPANHANDO">📖 Acompanhando</option>
-                <option value="CONCLUIDA">✅ Concluída</option>
-                <option value="PAUSADA">⏸️ Pausada</option>
-                <option value="RETOMANDO_DEPOIS">🔄 Retomando depois</option>
-                <option value="DROPADA">❌ Dropada</option>
-            </select>
-        </div>
-        <div class="filter-g">
-            <label>⭐ Favoritos</label>
-            <select id="fFiltroFav" onchange="filtrar()">
-                <option value="">Todos</option>
-                <option value="true">Apenas Favoritos</option>
-                <option value="false">Não Favoritos</option>
-            </select>
-        </div>
-        <div class="filter-g">
-            <label>🔄 Ordenar por</label>
-            <select id="fOrdem" onchange="filtrar()">
-                <option value="az">Nome (A-Z)</option>
-                <option value="za">Nome (Z-A)</option>
-                <option value="capDesc">Capítulos (Maior)</option>
-                <option value="capAsc">Capítulos (Menor)</option>
-                <option value="fav">Favoritos Primeiro</option>
-            </select>
-        </div>
-        <button class="btn-clear" onclick="limpar()">🗑️ Limpar Filtros</button>
-    </div>
-
-    <div id="lista"></div>
 
 </div>
 
+<!-- Modal -->
 <div class="overlay" id="overlay">
     <div class="modal">
         <h2>✏️ Atualizar Novel</h2>
@@ -316,182 +1077,439 @@
     </div>
 </div>
 
+<!-- Modal de confirmação de delete -->
+<div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-modal">
+        <div class="confirm-icon">🗑️</div>
+        <div class="confirm-title">Remover novel?</div>
+        <div class="confirm-desc">Essa ação não pode ser desfeita. A novel será removida permanentemente da sua estante.</div>
+        <span class="confirm-novel-name" id="confirmNovelName"></span>
+        <label class="confirm-input-label" for="confirmInput">
+            Digite <code>delete</code> para confirmar
+        </label>
+        <input
+                class="confirm-type-input"
+                id="confirmInput"
+                type="text"
+                placeholder="delete"
+                autocomplete="off"
+                spellcheck="false"
+                oninput="onConfirmInput(this)"
+        >
+        <div class="confirm-btns">
+            <button class="btn-cancel-confirm" onclick="fecharConfirm()">Cancelar</button>
+            <button class="btn-confirm-delete" id="btnConfirmDelete" disabled>Remover</button>
+        </div>
+    </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-    const API = 'http://localhost:8080/novels';
+    const API  = 'http://localhost:8080/novels';
     const AUTH = 'Basic ' + btoa('admin:1234');
-    let novels = [];
+
+    let novels          = [];
+    let novelsFiltradas = [];
+    let paginaAtual     = 1;
+    const itensPorPagina = 30;
+    let activePanelId   = null;
+    let addOpen         = false;
 
     const statusLabel = {
-      ACOMPANHANDO: '📖 Acompanhando',
-      CONCLUIDA: '✅ Concluída',
-      PAUSADA: '⏸️ Pausada',
-      RETOMANDO_DEPOIS: '🔄 Retomando depois',
-      DROPADA: '❌ Dropada'
+        ACOMPANHANDO:    '📖 Acompanhando',
+        CONCLUIDA:       '✅ Concluída',
+        PAUSADA:         '⏸️ Pausada',
+        RETOMANDO_DEPOIS:'🔄 Retomando depois',
+        DROPADA:         '❌ Dropada'
     };
 
-    async function carregar() {
-      try {
-        const r = await fetch(API, { headers: { Authorization: AUTH } });
-        novels = await r.json();
-        atualizarStats();
-        filtrar();
-      } catch(e) {
-        document.getElementById('lista').innerHTML = `<div class="empty"><div class="icon">⚠️</div><p>Erro ao conectar com a API.<br>Verifique se o Spring está rodando.</p></div>`;
-      }
+    // ── Formulário colapsável ──────────────────────────────────
+    function toggleAddCard() {
+        addOpen = !addOpen;
+        document.getElementById('addCardBody').classList.toggle('open', addOpen);
+        document.getElementById('addChevron').classList.toggle('open', addOpen);
+        if (addOpen) setTimeout(() => document.getElementById('fNameEng').focus(), 50);
+    }
+
+    // ── Painel ────────────────────────────────────────────────
+    function abrirPainel(id) {
+         if (window.innerWidth <= 768) {
+            window.location.href = `novel.html?id=${id}`;
+            return;
+         }
+        const n = novels.find(x => x.id === id);
+        if (!n) return;
+
+        if (activePanelId === id) { fecharPainel(); return; }
+        activePanelId = id;
+
+        document.querySelectorAll('.novel-card').forEach(c =>
+            c.classList.toggle('active', parseInt(c.dataset.id) === id)
+        );
+
+        const img = document.getElementById('panelImg');
+        const ph  = document.getElementById('panelPlaceholder');
+
+        if (n.cover) {
+            img.src = n.cover;
+            img.style.display = 'block';
+            ph.style.display  = 'none';
+            img.onerror = () => { img.style.display='none'; ph.style.display='flex'; ph.textContent=initials(n.nameEng); };
+        } else {
+            img.style.display = 'none';
+            ph.style.display  = 'flex';
+            ph.textContent    = initials(n.nameEng);
+        }
+
+        document.getElementById('panelTitle').textContent = n.nameEng || 'Sem título';
+        document.getElementById('panelKor').textContent   = n.nameKor || '';
+
+        const stars   = n.rating ? '★'.repeat(n.rating) + '☆'.repeat(5 - n.rating) : null;
+        const dataStr = n.dataAtualizacao
+            ? new Date(n.dataAtualizacao).toLocaleDateString('pt-BR', {day:'2-digit', month:'short', year:'numeric'})
+            : null;
+
+        document.getElementById('panelMeta').innerHTML = `
+            <div class="panel-meta-row">
+                <span class="lbl">Capítulo</span>
+                <span class="val">${n.chapter ?? 0}</span>
+            </div>
+            <div class="panel-meta-row">
+                <span class="lbl">Status</span>
+                <span class="panel-badge ${n.status}">${statusLabel[n.status] || n.status}</span>
+            </div>
+            ${n.author ? `<div class="panel-meta-row">
+                <span class="lbl">Autor</span>
+                <span class="val" style="font-size:0.78em">${esc(n.author)}</span>
+            </div>` : ''}
+            ${stars ? `<div class="panel-meta-row">
+                <span class="lbl">Nota</span>
+                <span style="color:var(--yellow);font-size:0.85em">${stars}</span>
+            </div>` : ''}
+            ${n.favorito ? `<div class="panel-meta-row">
+                <span class="lbl">Favorita</span>
+                <span class="val">⭐</span>
+            </div>` : ''}
+            ${dataStr ? `<div class="panel-meta-row">
+                <span class="lbl">Atualizada</span>
+                <span class="val" style="font-size:0.76em">${dataStr}</span>
+            </div>` : ''}
+        `;
+
+        const resenhaEl = document.getElementById('panelResenha');
+        if (n.resenha) { resenhaEl.textContent = n.resenha; resenhaEl.style.display = 'block'; }
+        else             { resenhaEl.style.display = 'none'; }
+
+        document.getElementById('panelActions').innerHTML = `
+            <a class="panel-btn panel-btn-primary" href="novel.html?id=${n.id}">🔗 Ver detalhes</a>
+            <button class="panel-btn panel-btn-ghost" onclick="abrirModal(${n.id})">✏️ Editar</button>
+        `;
+
+        document.getElementById('sidePanel').classList.add('visible');
+        document.getElementById('mainContent').classList.add('panel-open');
+    }
+
+    function fecharPainel() {
+        activePanelId = null;
+        document.getElementById('sidePanel').classList.remove('visible');
+        document.getElementById('mainContent').classList.remove('panel-open');
+        document.querySelectorAll('.novel-card').forEach(c => c.classList.remove('active'));
+    }
+
+    // ── Carregar ──────────────────────────────────────────────
+    async function carregar(manterPainel = false) {
+        try {
+            const r = await fetch(API, { headers: { Authorization: AUTH } });
+            novels = await r.json();
+            atualizarStats();
+            filtrar();
+            if (manterPainel && activePanelId) {
+                const idAtivo = activePanelId;
+                activePanelId = null;
+                abrirPainel(idAtivo);
+            }
+        } catch(e) {
+            document.getElementById('lista').innerHTML =
+                `<div class="empty"><div class="icon">⚠️</div><p>Erro ao conectar com a API.</p></div>`;
+        }
     }
 
     function atualizarStats() {
-      const total = novels.length;
-      const caps = novels.reduce((s, n) => s + (n.chapter || 0), 0);
-      document.getElementById('sTotal').textContent = total;
-      document.getElementById('sChapters').textContent = caps.toLocaleString('pt-BR');
-      document.getElementById('sAvg').textContent = total > 0 ? (caps / total).toFixed(1) : '0';
+        const total = novels.length;
+        const caps  = novels.reduce((s, n) => s + (n.chapter || 0), 0);
+        const favs  = novels.filter(n => n.favorito).length;
+        document.getElementById('sTotal').textContent    = total;
+        document.getElementById('sChapters').textContent = caps.toLocaleString('pt-BR');
+        document.getElementById('sAvg').textContent      = total > 0 ? (caps / total).toFixed(1) : '0';
+        document.getElementById('sFavs').textContent     = favs;
     }
 
+    // ── Busca ─────────────────────────────────────────────────
+    function onBusca() {
+        const val = document.getElementById('busca').value;
+        document.getElementById('searchClear').classList.toggle('show', val.length > 0);
+        filtrar();
+    }
+
+    function limparBusca() {
+        document.getElementById('busca').value = '';
+        document.getElementById('searchClear').classList.remove('show');
+        filtrar();
+    }
+
+    // ── Filtrar ───────────────────────────────────────────────
     function filtrar() {
-      const busca = document.getElementById('busca').value.toLowerCase();
-      const status = document.getElementById('fFiltroStatus').value;
-      const fav = document.getElementById('fFiltroFav').value;
-      const ordem = document.getElementById('fOrdem').value;
+        const busca  = document.getElementById('busca').value.toLowerCase();
+        const status = document.getElementById('fFiltroStatus').value;
+        const fav    = document.getElementById('fFiltroFav').value;
+        const rating = document.getElementById('fFiltroRating').value;
+        const ordem  = document.getElementById('fOrdem').value;
 
-      let lista = novels.filter(n => {
-        const nome = ((n.nameEng || '') + ' ' + (n.nameKor || '')).toLowerCase();
-        if (busca && !nome.includes(busca)) return false;
-        if (status && n.status !== status) return false;
-        if (fav !== '' && String(n.favorito) !== fav) return false;
-        return true;
-      });
-
-      lista.sort((a, b) => {
-        if (ordem === 'az') return (a.nameEng || '').localeCompare(b.nameEng || '');
-        if (ordem === 'za') return (b.nameEng || '').localeCompare(a.nameEng || '');
-        if (ordem === 'capDesc') return (b.chapter || 0) - (a.chapter || 0);
-        if (ordem === 'capAsc') return (a.chapter || 0) - (b.chapter || 0);
-        if (ordem === 'fav') return (b.favorito ? 1 : 0) - (a.favorito ? 1 : 0);
-        return 0;
-      });
-
-      renderizar(lista);
-    }
-
-    function renderizar(lista) {
-      const el = document.getElementById('lista');
-      if (lista.length === 0) {
-        el.innerHTML = `<div class="empty"><div class="icon">📚</div><p>Nenhuma novel encontrada.</p></div>`;
-        return;
-      }
-      el.innerHTML = `<div class="novels-grid">${lista.map((n, i) => `
-        <div class="novel-card">
-          <div class="novel-num">#${i + 1}</div>
-          <div class="novel-eng">${esc(n.nameEng || '')}</div>
-          <div class="novel-kor">${esc(n.nameKor || '')}</div>
-          <div class="badges">
-            <span class="badge badge-chapter">Cap. ${(n.chapter || 0).toLocaleString('pt-BR')}</span>
-            <span class="badge badge-${n.status || ''}">${statusLabel[n.status] || n.status || ''}</span>
-          </div>
-          <div class="actions">
-            <button class="btn-action btn-edit" onclick="abrirModal(${n.id})">✏️ Atualizar</button>
-            <button class="btn-action btn-del" onclick="deletar(${n.id})">🗑️ Excluir</button>
-            <button class="btn-fav" onclick="favoritar(${n.id})">${n.favorito ? '⭐' : '☆'}</button>
-          </div>
-        </div>`).join('')}</div>`;
-    }
-
-    async function adicionar() {
-      const nameEng = document.getElementById('fNameEng').value.trim();
-      const nameKor = document.getElementById('fNameKor').value.trim();
-      const author  = document.getElementById('fAuthor').value.trim();
-      const chapterRaw = document.getElementById('fChapter').value;
-      const chapter = chapterRaw === '' ? 0 : parseInt(chapterRaw, 10);
-      const status  = document.getElementById('fStatus').value;
-
-      if (!nameEng || !status) { toast('Preencha pelo menos o nome e o status!', true); return; }
-
-      try {
-        const resp = await fetch(API, {
-          method: 'POST',
-          headers: { Authorization: AUTH, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nameEng, nameKor, author, chapter, status, favorito: false, usuario: { id: 1 } })
+        let lista = novels.filter(n => {
+            const nome = ((n.nameEng||'') + ' ' + (n.nameKor||'') + ' ' + (n.author||'')).toLowerCase();
+            if (busca && !nome.includes(busca)) return false;
+            if (status && n.status !== status) return false;
+            if (fav !== '' && String(n.favorito) !== fav) return false;
+            if (rating === '0' && n.rating) return false;
+            if (rating && rating !== '0' && (n.rating||0) < parseInt(rating)) return false;
+            return true;
         });
-        if (!resp.ok) { toast('Erro ao adicionar: ' + resp.status, true); return; }
-        document.getElementById('fNameEng').value = '';
-        document.getElementById('fNameKor').value = '';
-        document.getElementById('fAuthor').value = '';
-        document.getElementById('fChapter').value = '';
-        document.getElementById('fStatus').value = '';
-        toast('Novel adicionada! ✅');
-        carregar();
-      } catch(e) { toast('Erro ao adicionar', true); }
+
+        lista.sort((a, b) => {
+            if (ordem === 'az')        return (a.nameEng||'').localeCompare(b.nameEng||'');
+            if (ordem === 'za')        return (b.nameEng||'').localeCompare(a.nameEng||'');
+            if (ordem === 'capDesc')   return (b.chapter||0) - (a.chapter||0);
+            if (ordem === 'capAsc')    return (a.chapter||0) - (b.chapter||0);
+            if (ordem === 'fav')       return (b.favorito?1:0) - (a.favorito?1:0);
+            if (ordem === 'rating')    return (b.rating||0) - (a.rating||0);
+            if (ordem === 'adicionado') return new Date(b.dataAdicao||0) - new Date(a.dataAdicao||0);
+            // padrão — última modificação
+            return new Date(b.dataAtualizacao||b.dataAdicao||0) - new Date(a.dataAtualizacao||a.dataAdicao||0);
+        });
+
+        novelsFiltradas = lista;
+        paginaAtual = 1;
+
+        const info = document.getElementById('resultsInfo');
+        info.innerHTML = lista.length !== novels.length
+            ? `Mostrando <span>${lista.length}</span> de ${novels.length} novels`
+            : `<span>${lista.length}</span> novel${lista.length !== 1 ? 's' : ''} na estante`;
+
+        renderizar();
+    }
+
+    // "Atualizado" nos últimos 3 dias
+    function isRecente(n) {
+        const d = n.dataAtualizacao || n.dataAdicao;
+        if (!d) return false;
+        return (Date.now() - new Date(d)) < 3 * 24 * 60 * 60 * 1000;
+    }
+
+    // ── Renderizar ────────────────────────────────────────────
+    function renderizar() {
+        const el   = document.getElementById('lista');
+        const lista = novelsFiltradas;
+
+        if (!lista.length) {
+            el.innerHTML = `<div class="empty"><div class="icon">📚</div><p>Nenhuma novel encontrada.<br>Tente mudar os filtros.</p></div>`;
+            return;
+        }
+
+        const inicio       = (paginaAtual - 1) * itensPorPagina;
+        const pagina       = lista.slice(inicio, inicio + itensPorPagina);
+        const totalPaginas = Math.ceil(lista.length / itensPorPagina);
+
+        el.innerHTML = `
+<div class="novels-grid">
+${pagina.map(n => {
+    const stars   = n.rating ? '★'.repeat(n.rating)+'☆'.repeat(5-n.rating) : '';
+    const recente = isRecente(n);
+    return `
+<div class="novel-card${activePanelId===n.id?' active':''}${recente?' recently-updated':''}"
+     data-id="${n.id}" onclick="abrirPainel(${n.id})">
+    <div class="novel-card-top">
+        <div class="novel-eng">${esc(n.nameEng||'Sem título')}</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;padding-left:8px;">
+            <span class="novel-num">#${novels.indexOf(n)+1}</span>
+            ${n.favorito?'<span class="card-fav">⭐</span>':''}
+        </div>
+    </div>
+    <div class="novel-kor">${esc(n.nameKor||'')}</div>
+    <div class="badges">
+        <span class="badge badge-chapter">${n.chapter??0} caps</span>
+        <span class="badge badge-${n.status}">${statusLabel[n.status]||n.status}</span>
+        ${stars?`<span class="card-rating">${stars}</span>`:''}
+    </div>
+    <div class="actions">
+        <button class="btn-action btn-edit" onclick="event.stopPropagation();abrirModal(${n.id})">✏️</button>
+        <button class="btn-action btn-del"  onclick="event.stopPropagation();confirmarDelete(${n.id}, '${esc(n.nameEng||'')}')" >🗑️</button>
+        <button class="btn-action btn-link" onclick="event.stopPropagation();location.href='novel.html?id=${n.id}'">🔗</button>
+        <button class="btn-fav" onclick="event.stopPropagation();favoritar(${n.id})">${n.favorito?'⭐':'☆'}</button>
+    </div>
+</div>`;
+}).join('')}
+</div>
+${totalPaginas > 1 ? `
+<div class="pagination-controls">
+    <button class="btn-page" ${paginaAtual===1?'disabled':''} onclick="mudarPagina(-1)">← Anterior</button>
+    <span class="page-info">Página ${paginaAtual} de ${totalPaginas}</span>
+    <button class="btn-page" ${paginaAtual===totalPaginas?'disabled':''} onclick="mudarPagina(1)">Próxima →</button>
+</div>` : ''}`;
+    }
+
+    function mudarPagina(delta) {
+        paginaAtual += delta;
+        renderizar();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ── CRUD ──────────────────────────────────────────────────
+    async function adicionar() {
+        const nameEng = document.getElementById('fNameEng').value.trim();
+        const nameKor = document.getElementById('fNameKor').value.trim();
+        const author  = document.getElementById('fAuthor').value.trim();
+        const chapter = parseInt(document.getElementById('fChapter').value) || 0;
+        const status  = document.getElementById('fStatus').value;
+
+        if (!nameEng || !status) { toast('Preencha o nome e o status!', true); return; }
+
+        try {
+            const resp = await fetch(API, {
+                method: 'POST',
+                headers: { Authorization: AUTH, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nameEng, nameKor, author, chapter, status, favorito: false, usuario: { id: 1 } })
+            });
+            if (!resp.ok) { toast('Erro ao adicionar: ' + resp.status, true); return; }
+            ['fNameEng','fNameKor','fAuthor','fChapter','fStatus'].forEach(id => document.getElementById(id).value = '');
+            toast('Novel adicionada! ✅');
+            addOpen = true; toggleAddCard(); // fecha o form
+            carregar();
+        } catch(e) { toast('Erro ao adicionar.', true); }
     }
 
     async function deletar(id) {
-      if (!confirm('Tem certeza que deseja remover esta novel?')) return;
-      await fetch(`${API}/${id}`, { method: 'DELETE', headers: { Authorization: AUTH } });
-      toast('Novel removida!');
-      carregar();
+        await fetch(`${API}/${id}`, { method: 'DELETE', headers: { Authorization: AUTH } });
+        if (activePanelId === id) fecharPainel();
+        toast('Novel removida!');
+        carregar();
+    }
+
+    function confirmarDelete(id, nomeNovel) {
+        document.getElementById('confirmNovelName').textContent = nomeNovel || 'esta novel';
+        const input = document.getElementById('confirmInput');
+        input.value = '';
+        input.classList.remove('valid');
+        const btn = document.getElementById('btnConfirmDelete');
+        btn.disabled = true;
+        btn.classList.remove('enabled');
+        document.getElementById('confirmOverlay').classList.add('open');
+        setTimeout(() => input.focus(), 120);
+        btn.onclick = () => { fecharConfirm(); deletar(id); };
+    }
+
+    function onConfirmInput(input) {
+        const btn = document.getElementById('btnConfirmDelete');
+        const valid = input.value === 'delete';
+        input.classList.toggle('valid', valid);
+        btn.disabled = !valid;
+        btn.classList.toggle('enabled', valid);
+    }
+
+    function fecharConfirm() {
+        document.getElementById('confirmOverlay').classList.remove('open');
     }
 
     async function favoritar(id) {
-      await fetch(`${API}/${id}/favoritar`, { method: 'PATCH', headers: { Authorization: AUTH } });
-      carregar();
+        await fetch(`${API}/${id}/favoritar`, { method: 'PATCH', headers: { Authorization: AUTH } });
+        const n = novels.find(x => x.id === id);
+        if (n) n.favorito = !n.favorito;
+        atualizarStats();
+        filtrar();
+        if (activePanelId === id) {
+            activePanelId = null;
+            abrirPainel(id);
+        }
     }
 
     function abrirModal(id) {
-      const n = novels.find(x => x.id === id);
-      if (!n) return;
-      document.getElementById('mId').value = id;
-      document.getElementById('mEng').textContent = n.nameEng || '';
-      document.getElementById('mKor').textContent = n.nameKor || '';
-      document.getElementById('mAtualCap').textContent = `ℹ️ Capítulo atual: ${n.chapter || 0}`;
-      document.getElementById('mAtualStatus').textContent = `ℹ️ Status atual: ${statusLabel[n.status] || n.status}`;
-      document.getElementById('mChapter').value = n.chapter || 0;
-      document.getElementById('mStatus').value = n.status || 'ACOMPANHANDO';
-      document.getElementById('overlay').classList.add('open');
+        const n = novels.find(x => x.id === id);
+        if (!n) return;
+        document.getElementById('mId').value              = id;
+        document.getElementById('mEng').textContent       = n.nameEng || '';
+        document.getElementById('mKor').textContent       = n.nameKor || '';
+        document.getElementById('mAtualCap').textContent  = `ℹ️ Atual: ${n.chapter??0} caps`;
+        document.getElementById('mAtualStatus').textContent = `ℹ️ Atual: ${statusLabel[n.status]||n.status}`;
+        document.getElementById('mChapter').value         = n.chapter ?? 0;
+        document.getElementById('mStatus').value          = n.status || 'ACOMPANHANDO';
+        document.getElementById('overlay').classList.add('open');
     }
 
     function fechar() { document.getElementById('overlay').classList.remove('open'); }
 
     async function salvar() {
-      const id = document.getElementById('mId').value;
-      const n = novels.find(x => x.id == id);
-      const chapterRaw = document.getElementById('mChapter').value;
-      const chapter = chapterRaw === '' ? 0 : parseInt(chapterRaw, 10);
-      const status = document.getElementById('mStatus').value;
-      try {
-        await fetch(`${API}/${id}`, {
-          method: 'PUT',
-          headers: { Authorization: AUTH, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...n, chapter, status })
-        });
-        fechar();
-        toast('Novel atualizada! ✅');
-        carregar();
-      } catch(e) { toast('Erro ao salvar', true); }
+        const id      = document.getElementById('mId').value;
+        const n       = novels.find(x => x.id == id);
+        const chapter = parseInt(document.getElementById('mChapter').value) || 0;
+        const status  = document.getElementById('mStatus').value;
+        try {
+            await fetch(`${API}/${id}`, {
+                method: 'PUT',
+                headers: { Authorization: AUTH, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...n, chapter, status })
+            });
+            fechar();
+            toast('Novel atualizada! ✅');
+            carregar(true);
+        } catch(e) { toast('Erro ao salvar.', true); }
     }
 
     function limpar() {
-      document.getElementById('busca').value = '';
-      document.getElementById('fFiltroStatus').value = '';
-      document.getElementById('fFiltroFav').value = '';
-      document.getElementById('fOrdem').value = 'az';
-      filtrar();
+        document.getElementById('busca').value          = '';
+        document.getElementById('searchClear').classList.remove('show');
+        document.getElementById('fFiltroStatus').value  = '';
+        document.getElementById('fFiltroFav').value     = '';
+        document.getElementById('fFiltroRating').value  = '';
+        document.getElementById('fOrdem').value         = 'recente';
+        filtrar();
     }
 
     function toast(msg, err = false) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.className = 'toast show' + (err ? ' err' : '');
-      setTimeout(() => t.className = 'toast', 3000);
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'toast show' + (err ? ' err' : '');
+        setTimeout(() => t.className = 'toast', 3000);
     }
 
     function esc(s) {
-      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        if (!s) return '';
+        return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function initials(name) {
+        if (!name) return '?';
+        return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
     }
 
     document.getElementById('overlay').addEventListener('click', e => {
-      if (e.target.id === 'overlay') fechar();
+        if (e.target.id === 'overlay') fechar();
+    });
+
+    document.getElementById('confirmOverlay').addEventListener('click', e => {
+        if (e.target.id === 'confirmOverlay') fecharConfirm();
+    });
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') { fecharPainel(); fechar(); fecharConfirm(); }
+        if (e.key === 'Enter') {
+            const btn = document.getElementById('btnConfirmDelete');
+            if (!btn.disabled) btn.click();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            document.getElementById('busca').focus();
+            document.getElementById('busca').select();
+        }
     });
 
     carregar();
