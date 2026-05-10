@@ -2,6 +2,7 @@ package com.ghas.chaekgalpi.model;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -19,6 +20,15 @@ public class Novel {
     private String nameKor;
     private String author;
     private Integer chapter;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String resenha;
+    @Column
+    private Integer rating;
+    @Lob
+    @Column(columnDefinition = "TEXT") // Ou "LONGTEXT" se for MySQL
+    private String cover;
 
     @Enumerated(EnumType.STRING)
     private NovelStatus status;
@@ -137,4 +147,27 @@ public class Novel {
         this.dataAtualizacao = dataAtualizacao;
     }
 
+    public String getResenha() {
+        return resenha;
+    }
+
+    public void setResenha(String resenha) {
+        this.resenha = resenha;
+    }
+
+    public Integer getRating() {
+        return rating;
+    }
+
+    public void setRating(Integer rating) {
+        this.rating = rating;
+    }
+
+    public String getCover() {
+        return cover;
+    }
+
+    public void setCover(String cover) {
+        this.cover = cover;
+    }
 }
