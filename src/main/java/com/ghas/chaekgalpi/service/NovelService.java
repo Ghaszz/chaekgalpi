@@ -5,6 +5,7 @@ import com.ghas.chaekgalpi.model.Usuario;
 import com.ghas.chaekgalpi.repository.NovelRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -43,6 +44,19 @@ public class NovelService {
     public void favoritar(Long id) {
         Novel novel = findById(id);
         novel.setFavorito(!novel.getFavorito());
+        novelRepository.save(novel);
+    }
+    // Para salvar sua nota (as estrelas)
+    public void atualizarRating(Long id, Integer nota) {
+        Novel novel = findById(id);
+        novel.setRating(nota);
+        novelRepository.save(novel);
+    }
+
+    // Para salvar sua resenha pessoal
+    public void atualizarResenha(Long id, String texto) {
+        Novel novel = findById(id);
+        novel.setResenha(texto);
         novelRepository.save(novel);
     }
 }

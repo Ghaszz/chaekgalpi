@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/novels")
@@ -44,6 +45,17 @@ public class NovelController {
         }
     }
 
+    @GetMapping("/{id}")
+    public Novel getById(@PathVariable Long id, @AuthenticationPrincipal UserDetails user) {
+        Novel novel = novelService.findById(id);
+
+        // Proteção: Só permite ver se a novel for do usuário logado
+        if (!novel.getUsuario().getNome().equals(user.getUsername())) {
+            throw new RuntimeException("Acesso negado");
+        }
+
+        return novel;
+    }
     @PutMapping("/{id}")
     public Novel update(@PathVariable Long id, @RequestBody Novel novel, @AuthenticationPrincipal UserDetails user) {
         Novel existing = novelService.findById(id);
@@ -63,5 +75,14 @@ public class NovelController {
         } else {
             throw new RuntimeException("Você não tem permissão para favoritar esta novel");
         }
+    }
+    @PutMapping("/{id}/rating")
+    public void setRating(@PathVariable Long id, @RequestBody Map<String, Integer> body) {
+        novelService.atualizarRating(id, body.get("rating"));
+    }
+
+    @PutMapping("/{id}/resenha")
+    public void setResenha(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        novelService.atualizarResenha(id, body.get("resenha"));
     }
 }

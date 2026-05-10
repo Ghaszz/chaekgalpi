@@ -20,6 +20,8 @@ public class UsuarioDetailsService implements UserDetailsService {
         Usuario usuario = usuarioRepository.findByNome(nome)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + nome));
 
+        System.out.println(">>> SENHA DO BANCO: " + usuario.getSenha()); // adiciona isso
+
         return User.builder()
                 .username(usuario.getNome())
                 .password(usuario.getSenha())
