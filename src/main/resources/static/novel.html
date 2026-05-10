@@ -4,298 +4,918 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chaekgalpi - Detalhes</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-          --bg: #0d0d14; --bg2: #13131f; --bg3: #1a1a2a;
-          --border: rgba(255,255,255,0.07);
-          --primary: #8b5cf6; --primary-light: #a78bfa;
-          --secondary: #38bdf8; --text: #e2e2ef;
-          --text-muted: #6b6b8a; --radius: 16px;
+            --bg: #0d0d14;
+            --bg2: #13131f;
+            --bg3: #1a1a2a;
+            --border: rgba(255,255,255,0.07);
+            --primary: #8b5cf6;
+            --primary-light: #a78bfa;
+            --secondary: #38bdf8;
+            --green: #34d399;
+            --red: #f87171;
+            --yellow: #fbbf24;
+            --text: #e2e2ef;
+            --text-muted: #6b6b8a;
+            --radius: 14px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-          background: var(--bg); color: var(--text);
-          font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
         }
 
-        /* Luz de fundo igual ao index */
-        body::before {
-          content: ''; position: fixed; inset: 0;
-          background: radial-gradient(ellipse at 15% 0%, rgba(139,92,246,0.12) 0%, transparent 50%);
-          pointer-events: none; z-index: 0;
+        /* ── Fundo ambiente com a cor da capa ── */
+        #ambientBg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            transition: background 1.2s ease;
+            background:
+                radial-gradient(ellipse at 15% 0%, rgba(139,92,246,0.12) 0%, transparent 55%),
+                radial-gradient(ellipse at 85% 100%, rgba(56,189,248,0.07) 0%, transparent 55%);
         }
 
-        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 1; }
+        .container {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 36px 20px 60px;
+            position: relative;
+            z-index: 1;
+        }
 
+        /* ── Voltar ── */
         .back-link {
-            display: inline-block; margin-bottom: 24px;
-            color: var(--primary-light); text-decoration: none;
-            font-weight: 600; font-size: 0.9em; transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 28px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85em;
+            transition: all 0.2s;
+            letter-spacing: 0.2px;
         }
-        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
 
-        /* Header Card */
-        .novel-header {
-            display: grid; grid-template-columns: 240px 1fr; gap: 40px;
-            background: var(--bg2); border: 1px solid var(--border);
-            padding: 30px; border-radius: var(--radius);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        .back-link:hover { color: var(--primary-light); transform: translateX(-4px); }
+
+        /* ── Hero header ── */
+        .hero {
+            position: relative;
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 24px;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
         }
+
+        /* cover como fundo com blur */
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            filter: blur(28px) brightness(0.25) saturate(1.4);
+            transform: scale(1.1);
+            transition: background-image 0.8s ease;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 32px;
+            padding: 32px;
+            align-items: start;
+        }
+
+        /* ── Capa ── */
+        .cover-col { position: relative; }
 
         .cover-wrapper {
-            width: 100%; height: 340px; background: var(--bg3);
-            border-radius: 12px; overflow: hidden; border: 1px solid var(--border);
+            width: 200px;
+            height: 290px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            background: var(--bg3);
+            position: relative;
+            cursor: pointer;
         }
-        .cover-wrapper img { width: 100%; height: 100%; object-fit: cover; }
 
-        .novel-info h1 {
-            font-size: 2.2em; font-weight: 800; margin-bottom: 8px;
+        .cover-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .cover-wrapper:hover img { transform: scale(1.04); }
+
+        /* placeholder sem capa */
+        .cover-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5em;
+            font-weight: 800;
+            color: var(--primary-light);
+            opacity: 0.3;
+            letter-spacing: -2px;
+        }
+
+        /* overlay de edição da capa — aparece só no hover */
+        .cover-edit-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.65);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            border-radius: 10px;
+        }
+
+        .cover-wrapper:hover .cover-edit-overlay { opacity: 1; }
+
+        .cover-edit-overlay span {
+            font-size: 0.72em;
+            font-weight: 700;
+            color: rgba(255,255,255,0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .cover-edit-overlay .icon-cam { font-size: 1.8em; }
+
+        /* painel de edição da capa — escondido */
+        .cover-edit-panel {
+            display: none;
+            margin-top: 10px;
+            background: rgba(0,0,0,0.35);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            width: 200px;
+        }
+
+        .cover-edit-panel.open { display: block; }
+
+        .cover-edit-panel label {
+            font-size: 0.65em;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .cover-edit-panel input[type=text] {
+            width: 100%;
+            padding: 7px 10px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.8em;
+            outline: none;
+            margin-bottom: 8px;
+            transition: border-color 0.2s;
+        }
+
+        .cover-edit-panel input[type=text]:focus { border-color: var(--primary); }
+
+        .cover-edit-panel .sep {
+            text-align: center;
+            font-size: 0.65em;
+            color: var(--text-muted);
+            margin: 6px 0;
+        }
+
+        .cover-edit-panel input[type=file] {
+            width: 100%;
+            font-size: 0.72em;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .cover-edit-panel input[type=file]::file-selector-button {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            padding: 4px 8px;
+            font-size: 0.85em;
+            cursor: pointer;
+            font-family: inherit;
+            margin-right: 8px;
+        }
+
+        /* ── Info da novel ── */
+        .info-col { display: flex; flex-direction: column; gap: 0; }
+
+        .novel-fav-badge {
+            font-size: 0.78em;
+            font-weight: 700;
+            color: var(--yellow);
+            margin-bottom: 8px;
+            display: none;
+        }
+
+        .novel-fav-badge.show { display: block; }
+
+        .novel-title {
+            font-size: 2em;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 6px;
             background: linear-gradient(135deg, #fff 0%, var(--primary-light) 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .novel-kor { font-family: 'Noto Sans KR'; color: var(--text-muted); font-size: 1.1em; margin-bottom: 20px; }
 
-        .stats-row { display: flex; gap: 15px; margin-bottom: 25px; }
-        .stat-item { background: var(--bg3); padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border); flex: 1; }
-        .stat-item span { font-size: 0.7em; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-        .stat-item b { color: var(--secondary); font-size: 1.1em; display: block; margin-top: 2px; }
+        .novel-kor {
+            font-family: 'Noto Sans KR', sans-serif;
+            color: var(--text-muted);
+            font-size: 1em;
+            font-weight: 300;
+            margin-bottom: 22px;
+        }
 
-        /* Estrelas */
-        .stars { font-size: 2em; display: flex; gap: 8px; margin-top: 10px; }
-        .star { cursor: pointer; color: #2a2a3a; transition: all 0.2s; }
-        .star.active { color: #fbbf24; text-shadow: 0 0 15px rgba(251,191,36,0.4); }
+        /* badges de status */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .status-badge.ACOMPANHANDO { background: rgba(56,189,248,0.12); color: #38bdf8; border: 1px solid rgba(56,189,248,0.2); }
+        .status-badge.CONCLUIDA    { background: rgba(52,211,153,0.12); color: var(--green); border: 1px solid rgba(52,211,153,0.2); }
+        .status-badge.PAUSADA, .status-badge.RETOMANDO_DEPOIS { background: rgba(251,191,36,0.12); color: var(--yellow); border: 1px solid rgba(251,191,36,0.2); }
+        .status-badge.DROPADA      { background: rgba(248,113,113,0.12); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .meta-item {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px;
+        }
+
+        .meta-item .lbl {
+            font-size: 0.65em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .meta-item .val {
+            font-size: 1em;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        /* ── Estrelas ── */
+        .rating-section { margin-top: 4px; }
+
+        .rating-label {
+            font-size: 0.65em;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .stars {
+            display: flex;
+            gap: 6px;
+        }
+
+        .star {
+            font-size: 1.7em;
+            cursor: pointer;
+            color: rgba(255,255,255,0.1);
+            transition: all 0.15s;
+            user-select: none;
+        }
+
+        .star.active { color: var(--yellow); text-shadow: 0 0 12px rgba(251,191,36,0.5); }
         .star:hover { transform: scale(1.2); }
 
-        /* Inputs e Cards */
+        /* ── Cards de conteúdo ── */
+        .cards-section { display: flex; flex-direction: column; gap: 16px; }
+
         .content-card {
-            margin-top: 25px; background: var(--bg2);
-            border: 1px solid var(--border); border-radius: var(--radius); padding: 30px;
-        }
-        .section-title {
-            font-size: 1.1em; font-weight: 700; color: var(--primary-light);
-            margin-bottom: 15px; display: flex; align-items: center; gap: 10px;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 26px 28px;
         }
 
-        input[type="text"], textarea {
-            width: 100%; background: var(--bg3); border: 1px solid var(--border);
-            border-radius: 10px; color: var(--text); padding: 15px;
-            font-family: inherit; font-size: 0.95em; outline: none; transition: 0.2s;
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
         }
-        input[type="text"]:focus, textarea:focus { border-color: var(--primary); }
 
-        textarea { min-height: 140px; resize: vertical; margin-bottom: 20px; }
-
-        .btn-save {
-            background: linear-gradient(135deg, var(--primary), #6366f1);
-            color: white; border: none; padding: 14px 30px;
-            border-radius: 10px; font-weight: 700; cursor: pointer;
-            width: 100%; font-size: 1em; transition: 0.3s;
+        .card-title {
+            font-size: 0.95em;
+            font-weight: 700;
+            color: var(--primary-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .btn-save:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(139,92,246,0.3); }
 
+        /* ── Resenha ── */
         .resenha-view {
-            background: rgba(139,92,246,0.06); border-left: 4px solid var(--primary);
-            padding: 20px; border-radius: 8px; margin-bottom: 25px;
-            line-height: 1.6; font-style: italic; color: #d1d1e0;
+            background: rgba(139,92,246,0.05);
+            border-left: 3px solid var(--primary);
+            border-radius: 6px;
+            padding: 16px 18px;
+            margin-bottom: 16px;
+            line-height: 1.75;
+            font-style: italic;
+            color: #cccce0;
+            font-size: 0.95em;
+            white-space: pre-wrap;
         }
 
-        @media (max-width: 768px) {
-            .novel-header { grid-template-columns: 1fr; text-align: center; }
-            .cover-wrapper { width: 180px; height: 260px; margin: 0 auto; }
-            .stats-row { flex-wrap: wrap; }
+        textarea {
+            width: 100%;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            padding: 14px 16px;
+            font-family: inherit;
+            font-size: 0.92em;
+            outline: none;
+            transition: border-color 0.2s;
+            min-height: 130px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        textarea:focus { border-color: var(--primary); }
+
+        /* ── Quick update (capítulo + status) ── */
+        .quick-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .field-group label {
+            display: block;
+            font-size: 0.68em;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .field-group input[type=number],
+        .field-group select {
+            width: 100%;
+            padding: 10px 13px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9em;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .field-group input:focus, .field-group select:focus { border-color: var(--primary); }
+        .field-group select option { background: #1a1a2e; }
+
+        /* ── Botões ── */
+        .btn-primary {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, var(--primary), #6366f1);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.25s;
+            letter-spacing: 0.2px;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139,92,246,0.35);
+        }
+
+        .btn-ghost {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 0.75em;
+            cursor: pointer;
+            padding: 4px 0;
+            transition: color 0.2s;
+            font-weight: 600;
+        }
+
+        .btn-ghost:hover { color: var(--primary-light); }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            background: var(--bg2);
+            border: 1px solid var(--primary);
+            border-radius: 10px;
+            padding: 13px 20px;
+            color: var(--text);
+            font-weight: 600;
+            font-size: 0.9em;
+            z-index: 200;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: all 0.3s;
+            pointer-events: none;
+        }
+
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.err { border-color: var(--red); }
+
+        /* ── Favoritar flutuante ── */
+        .btn-fav-float {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            font-size: 1.1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 3;
+        }
+
+        .btn-fav-float:hover { transform: scale(1.15); background: rgba(0,0,0,0.7); }
+
+        /* ── Responsivo ── */
+        @media (max-width: 680px) {
+            .hero-content { grid-template-columns: 1fr; text-align: center; }
+            .cover-wrapper { width: 160px; height: 230px; margin: 0 auto; }
+            .cover-edit-panel { width: 160px; margin: 10px auto 0; }
+            .meta-grid { grid-template-columns: repeat(2, 1fr); }
             .stars { justify-content: center; }
+            .novel-fav-badge { text-align: center; }
+            .quick-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
+
 <body>
+<div id="ambientBg"></div>
 
 <div class="container">
     <a href="index.html" class="back-link">← Voltar para a estante</a>
 
-    <div class="novel-header">
-        <div class="cover-wrapper">
-            <img id="cover" src="" alt="Capa da Novel">
-        </div>
-        <div class="novel-info">
-            <h1 id="title">Carregando...</h1>
-            <div id="nameKor" class="novel-kor"></div>
+    <!-- ── Hero ── -->
+    <div class="hero">
+        <div class="hero-bg" id="heroBg"></div>
 
-            <div class="stats-row">
-                <div class="stat-item"><span>Capítulo</span><b id="chapter">0</b></div>
-                <div class="stat-item"><span>Status</span><b id="status">-</b></div>
-                <div class="stat-item"><span>Autor</span><b id="author">-</b></div>
+        <div class="hero-content">
+            <!-- Capa -->
+            <div class="cover-col">
+                <div class="cover-wrapper" onclick="toggleCoverEdit()">
+                    <img id="coverImg" src="" alt="" style="display:none;">
+                    <div class="cover-placeholder" id="coverPlaceholder"></div>
+                    <div class="cover-edit-overlay">
+                        <span class="icon-cam">🖼️</span>
+                        <span>Trocar capa</span>
+                    </div>
+                </div>
+
+                <!-- painel discreto de edição da capa -->
+                <div class="cover-edit-panel" id="coverEditPanel">
+                    <label>🔗 Link da imagem</label>
+                    <input type="text" id="coverInput" placeholder="https://...">
+                    <div class="sep">— ou —</div>
+                    <input type="file" id="fileInput" accept="image/*">
+                </div>
             </div>
 
-            <div class="rating-box">
-                <label style="font-size: 0.75em; color: var(--text-muted); font-weight: 700;">SUA NOTA</label>
-                <div class="stars" id="starBox">
-                    <span class="star" data-v="1">★</span>
-                    <span class="star" data-v="2">★</span>
-                    <span class="star" data-v="3">★</span>
-                    <span class="star" data-v="4">★</span>
-                    <span class="star" data-v="5">★</span>
+            <!-- Info -->
+            <div class="info-col">
+                <div class="novel-fav-badge" id="favBadge">⭐ Favorita</div>
+                <h1 class="novel-title" id="title">Carregando...</h1>
+                <div class="novel-kor" id="nameKor"></div>
+                <div id="statusBadge" class="status-badge"></div>
+
+                <div class="meta-grid">
+                    <div class="meta-item">
+                        <span class="lbl">Capítulo</span>
+                        <span class="val" id="chapVal">—</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="lbl">Autor</span>
+                        <span class="val" id="authorVal" style="font-size:0.85em;">—</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="lbl">Favorita</span>
+                        <span class="val" id="favVal">—</span>
+                    </div>
+                </div>
+
+                <div class="rating-section">
+                    <span class="rating-label">Sua nota</span>
+                    <div class="stars" id="starBox">
+                        <span class="star" data-v="1">★</span>
+                        <span class="star" data-v="2">★</span>
+                        <span class="star" data-v="3">★</span>
+                        <span class="star" data-v="4">★</span>
+                        <span class="star" data-v="5">★</span>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- botão favoritar flutuante -->
+        <button class="btn-fav-float" id="btnFav" onclick="toggleFavoritar()" title="Favoritar">☆</button>
     </div>
 
-    <div class="content-card">
+    <!-- ── Cards ── -->
+    <div class="cards-section">
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <div class="section-title" style="margin: 0;">✍️ Minha Resenha</div>
-            <button onclick="toggleLink()" style="background: none; border: none; color: var(--text-muted); font-size: 0.7em; cursor: pointer; text-decoration: underline;">
-                Editar Link da Capa
-            </button>
+        <!-- Atualizar progresso -->
+        <div class="content-card">
+            <div class="card-header">
+                <div class="card-title">📖 Progresso</div>
+            </div>
+            <div class="quick-grid">
+                <div class="field-group">
+                    <label>Capítulo atual</label>
+                    <input type="number" id="inputChapter" min="0" placeholder="0">
+                </div>
+                <div class="field-group">
+                    <label>Status</label>
+                    <select id="inputStatus">
+                        <option value="ACOMPANHANDO">📖 Acompanhando</option>
+                        <option value="CONCLUIDA">✅ Concluída</option>
+                        <option value="PAUSADA">⏸️ Pausada</option>
+                        <option value="RETOMANDO_DEPOIS">🔄 Retomando depois</option>
+                        <option value="DROPADA">❌ Dropada</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="salvarProgresso()">💾 Salvar Alterações</button>
         </div>
 
-        <div id="linkArea" style="display: none; margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
-            <label style="font-size: 0.7em; color: var(--primary-light); display: block; margin-bottom: 5px; font-weight: 700;">🔗 LINK DA IMAGEM</label>
-            <input type="text" id="coverInput" placeholder="https://..." style="width: 100%;">
+        <!-- Resenha -->
+        <div class="content-card">
+            <div class="card-header">
+                <div class="card-title">✍️ Minha Resenha</div>
+                <button class="btn-ghost" onclick="toggleResenha()" id="btnToggleResenha">Editar</button>
+            </div>
+            <div id="resenhaDisplay" class="resenha-view" style="display:none;"></div>
+            <textarea id="resenhaInput" placeholder="O que você está achando dessa história?" style="display:none;"></textarea>
+            <div id="resenhaEmpty" style="color:var(--text-muted); font-size:0.88em; font-style:italic;">Nenhuma resenha ainda. Clique em Editar para adicionar.</div>
+            <button class="btn-primary" id="btnSalvarResenha" onclick="salvarResenha()" style="display:none; margin-top:14px;">💾 Salvar Resenha</button>
         </div>
 
-        <div id="resenhaDisplay" class="resenha-view" style="display: none;"></div>
-        <textarea id="resenhaInput" placeholder="O que você está achando dessa história?"></textarea>
-
-        <button class="btn-save" onclick="salvarTudo()">💾 Salvar Alterações</button>
     </div>
 </div>
+
+<div class="toast" id="toast"></div>
 
 <script>
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get('id');
     const API = 'http://localhost:8080/novels';
     const AUTH = 'Basic ' + btoa('admin:1234');
-
     let currentNovel = {};
+    let resenhaEditando = false;
 
-    // Função simples para mostrar/esconder o campo do link
-    function toggleLink() {
-        const area = document.getElementById('linkArea');
-        area.style.display = area.style.display === 'none' ? 'block' : 'none';
+    const statusLabel = {
+        ACOMPANHANDO: '📖 Acompanhando',
+        CONCLUIDA: '✅ Concluída',
+        PAUSADA: '⏸️ Pausada',
+        RETOMANDO_DEPOIS: '🔄 Retomando depois',
+        DROPADA: '❌ Dropada'
+    };
+
+    // ── Ambient background com a cor da capa ──────────────────
+    function setAmbient(src) {
+        if (!src) return;
+        // usa a cor dominante da imagem via canvas (aproximação)
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+            try {
+                const c = document.createElement('canvas');
+                c.width = 10; c.height = 10;
+                const ctx = c.getContext('2d');
+                ctx.drawImage(img, 0, 0, 10, 10);
+                const d = ctx.getImageData(0, 0, 10, 10).data;
+                let r = 0, g = 0, bl = 0, n = 0;
+                for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i+1]; bl += d[i+2]; n++; }
+                r = Math.round(r/n); g = Math.round(g/n); bl = Math.round(bl/n);
+                document.getElementById('ambientBg').style.background =
+                    `radial-gradient(ellipse at 20% 10%, rgba(${r},${g},${bl},0.18) 0%, transparent 55%),
+                     radial-gradient(ellipse at 80% 90%, rgba(${r},${g},${bl},0.08) 0%, transparent 50%)`;
+            } catch(e) {}
+        };
+        img.src = src;
     }
 
-    // No seu load(), lembre de preencher o input:
-    // document.getElementById('coverInput').value = currentNovel.cover || '';
+    // ── Carregar novel ─────────────────────────────────────────
+    async function load() {
+        if (!id) { showError('ID inválido.'); return; }
+        try {
+            const r = await fetch(`${API}/${id}`, { headers: { Authorization: AUTH } });
+            if (!r.ok) throw new Error();
+            currentNovel = await r.json();
+            render();
+        } catch(e) {
+            document.getElementById('title').textContent = 'Erro ao carregar.';
+        }
+    }
 
-    async function salvarTudo() {
-        const novoTexto = document.getElementById('resenhaInput').value;
-        const novoCover = document.getElementById('coverInput').value;
+    function render() {
+        const n = currentNovel;
 
-        currentNovel.resenha = novoTexto;
-        currentNovel.cover = novoCover;
+        document.title = `Chaekgalpi — ${n.nameEng || 'Novel'}`;
+        document.getElementById('title').textContent = n.nameEng || 'Sem título';
+        document.getElementById('nameKor').textContent = n.nameKor || '';
+        document.getElementById('chapVal').textContent = n.chapter ?? 0;
+        document.getElementById('authorVal').textContent = n.author || 'Desconhecido';
+        document.getElementById('favVal').textContent = n.favorito ? '⭐ Sim' : '—';
+
+        // status badge
+        const sb = document.getElementById('statusBadge');
+        sb.textContent = statusLabel[n.status] || n.status;
+        sb.className = `status-badge ${n.status}`;
+
+        // favorito
+        document.getElementById('btnFav').textContent = n.favorito ? '⭐' : '☆';
+        const favBadge = document.getElementById('favBadge');
+        favBadge.classList.toggle('show', !!n.favorito);
+
+        // capa
+        renderCover(n.cover);
+
+        // campos de edição
+        document.getElementById('inputChapter').value = n.chapter ?? 0;
+        document.getElementById('inputStatus').value = n.status || 'ACOMPANHANDO';
+
+        // resenha
+        renderResenha(n.resenha);
+
+        // estrelas
+        if (n.rating) highlightStars(n.rating);
+    }
+
+    function renderCover(src) {
+        const img = document.getElementById('coverImg');
+        const placeholder = document.getElementById('coverPlaceholder');
+        const heroBg = document.getElementById('heroBg');
+        const coverInput = document.getElementById('coverInput');
+
+        coverInput.value = src || '';
+
+        if (src) {
+            img.src = src;
+            img.style.display = 'block';
+            placeholder.style.display = 'none';
+            heroBg.style.backgroundImage = `url('${src}')`;
+            setAmbient(src);
+            img.onerror = () => {
+                img.style.display = 'none';
+                placeholder.style.display = 'flex';
+                placeholder.textContent = initials(currentNovel.nameEng);
+                heroBg.style.backgroundImage = '';
+            };
+        } else {
+            img.style.display = 'none';
+            placeholder.style.display = 'flex';
+            placeholder.textContent = initials(currentNovel.nameEng);
+            heroBg.style.backgroundImage = '';
+        }
+    }
+
+    function renderResenha(texto) {
+        const display = document.getElementById('resenhaDisplay');
+        const empty = document.getElementById('resenhaEmpty');
+        const input = document.getElementById('resenhaInput');
+        const btnSalvar = document.getElementById('btnSalvarResenha');
+        const btnToggle = document.getElementById('btnToggleResenha');
+
+        if (texto) {
+            display.textContent = texto;
+            display.style.display = 'block';
+            empty.style.display = 'none';
+            input.value = texto;
+            input.style.display = 'none';
+            btnSalvar.style.display = 'none';
+            btnToggle.textContent = 'Editar';
+            resenhaEditando = false;
+        } else {
+            display.style.display = 'none';
+            empty.style.display = 'block';
+            input.value = '';
+            input.style.display = 'none';
+            btnSalvar.style.display = 'none';
+            btnToggle.textContent = 'Escrever';
+            resenhaEditando = false;
+        }
+    }
+
+    // ── Toggle edição da resenha ───────────────────────────────
+    function toggleResenha() {
+        const input = document.getElementById('resenhaInput');
+        const display = document.getElementById('resenhaDisplay');
+        const empty = document.getElementById('resenhaEmpty');
+        const btnSalvar = document.getElementById('btnSalvarResenha');
+        const btnToggle = document.getElementById('btnToggleResenha');
+
+        resenhaEditando = !resenhaEditando;
+
+        if (resenhaEditando) {
+            input.value = currentNovel.resenha || '';
+            input.style.display = 'block';
+            display.style.display = 'none';
+            empty.style.display = 'none';
+            btnSalvar.style.display = 'block';
+            btnToggle.textContent = 'Cancelar';
+            input.focus();
+        } else {
+            renderResenha(currentNovel.resenha);
+        }
+    }
+
+    // ── Toggle painel de capa ──────────────────────────────────
+    function toggleCoverEdit() {
+        document.getElementById('coverEditPanel').classList.toggle('open');
+    }
+
+    // ── Salvar progresso (capítulo + status) ──────────────────
+    async function salvarProgresso() {
+        const chapter = parseInt(document.getElementById('inputChapter').value) || 0;
+        const status = document.getElementById('inputStatus').value;
+        const novaCapa = await getCoverFromPanel();
+
+        const payload = { ...currentNovel, chapter, status };
+        if (novaCapa) payload.cover = novaCapa;
 
         try {
             const resp = await fetch(`${API}/${id}`, {
                 method: 'PUT',
-                headers: {
-                    'Authorization': AUTH,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(currentNovel)
+                headers: { Authorization: AUTH, 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
-
-            if(resp.ok) {
-                alert("Salvo! ✨");
-                location.reload();
-            }
-        } catch (e) {
-            alert("Erro ao salvar.");
-        }
+            if (!resp.ok) throw new Error();
+            currentNovel = { ...payload };
+            render();
+            document.getElementById('coverEditPanel').classList.remove('open');
+            toast('Progresso salvo! ✅');
+        } catch(e) { toast('Erro ao salvar.', true); }
     }
 
-    // 1. Função para transformar o arquivo em texto (Base64)
+    // ── Salvar resenha ─────────────────────────────────────────
+    async function salvarResenha() {
+        const resenha = document.getElementById('resenhaInput').value;
+        try {
+            const resp = await fetch(`${API}/${id}`, {
+                method: 'PUT',
+                headers: { Authorization: AUTH, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...currentNovel, resenha })
+            });
+            if (!resp.ok) throw new Error();
+            currentNovel.resenha = resenha;
+            renderResenha(resenha);
+            toast('Resenha salva! ✅');
+        } catch(e) { toast('Erro ao salvar resenha.', true); }
+    }
+
+    // ── Pega capa do painel (link ou arquivo) ─────────────────
+    async function getCoverFromPanel() {
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput.files.length > 0) {
+            return await fileToBase64(fileInput.files[0]);
+        }
+        const link = document.getElementById('coverInput').value.trim();
+        if (link && link !== (currentNovel.cover || '')) return link;
+        return null;
+    }
+
     function fileToBase64(file) {
-        return new Promise((resolve, reject) => {
+        return new Promise((res, rej) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
+            reader.onload = () => res(reader.result);
+            reader.onerror = rej;
         });
     }
 
-    async function load() {
-        if (!id) return;
+    // ── Favoritar ─────────────────────────────────────────────
+    async function toggleFavoritar() {
         try {
-            const r = await fetch(`${API}/${id}`, { headers: { 'Authorization': AUTH } });
-            if (!r.ok) throw new Error();
-            currentNovel = await r.json();
-
-            document.getElementById('title').textContent = currentNovel.nameEng || 'Sem título';
-            document.getElementById('nameKor').textContent = currentNovel.nameKor || '';
-            document.getElementById('chapter').textContent = currentNovel.chapter || 0;
-            document.getElementById('status').textContent = currentNovel.status || '-';
-            document.getElementById('author').textContent = currentNovel.author || 'Desconhecido';
-
-            // Aqui ele carrega o que estiver no banco (link ou Base64)
-            const coverImg = currentNovel.cover || 'https://via.placeholder.com/240x340?text=Sem+Capa';
-            document.getElementById('cover').src = coverImg;
-
-            if (currentNovel.resenha) {
-                const display = document.getElementById('resenhaDisplay');
-                display.textContent = currentNovel.resenha;
-                display.style.display = 'block';
-                document.getElementById('resenhaInput').value = currentNovel.resenha;
-            }
-            if (currentNovel.rating) highlightStars(currentNovel.rating);
-        } catch (e) {
-            document.getElementById('title').textContent = "Erro ao carregar.";
-        }
+            await fetch(`${API}/${id}/favoritar`, { method: 'PATCH', headers: { Authorization: AUTH } });
+            currentNovel.favorito = !currentNovel.favorito;
+            document.getElementById('btnFav').textContent = currentNovel.favorito ? '⭐' : '☆';
+            document.getElementById('favVal').textContent = currentNovel.favorito ? '⭐ Sim' : '—';
+            document.getElementById('favBadge').classList.toggle('show', currentNovel.favorito);
+            toast(currentNovel.favorito ? 'Adicionada aos favoritos! ⭐' : 'Removida dos favoritos.');
+        } catch(e) { toast('Erro.', true); }
     }
 
-    async function salvarTudo() {
-        const fileInput = document.getElementById('fileInput'); // Referência ao novo input de arquivo
-
-        // Se o usuário selecionou um arquivo, converte. Se não, mantém o que já tinha.
-        if (fileInput && fileInput.files.length > 0) {
-            const file = fileInput.files[0];
-            currentNovel.cover = await fileToBase64(file);
-        } else {
-            // Se não subiu arquivo, tenta pegar o que está no input de texto (caso queira usar link)
-            const novoLink = document.getElementById('coverInput').value;
-            if(novoLink) currentNovel.cover = novoLink;
-        }
-
-        currentNovel.resenha = document.getElementById('resenhaInput').value;
-
-        try {
-            const resp = await fetch(`${API}/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': AUTH,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(currentNovel)
-            });
-
-            if(resp.ok) {
-                alert("Salvo com sucesso! 🚀");
-                location.reload();
-            }
-        } catch (e) {
-            alert("Erro ao salvar. Verifique se o banco aceita textos longos (LONGTEXT).");
-        }
-    }
-
+    // ── Estrelas ──────────────────────────────────────────────
     function highlightStars(rating) {
         document.querySelectorAll('.star').forEach(s => {
-            s.classList.toggle('active', s.dataset.v <= rating);
+            s.classList.toggle('active', parseInt(s.dataset.v) <= rating);
         });
     }
 
     document.querySelectorAll('.star').forEach(s => {
+        s.addEventListener('mouseenter', () => highlightStars(parseInt(s.dataset.v)));
+        s.addEventListener('mouseleave', () => highlightStars(currentNovel.rating || 0));
         s.onclick = async () => {
             const v = parseInt(s.dataset.v);
-            currentNovel.rating = v;
-            await fetch(`${API}/${id}/rating`, {
-                method: 'PUT',
-                headers: { 'Authorization': AUTH, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ rating: v })
-            });
-            highlightStars(v);
+            // se clicar na mesma nota, remove
+            const nova = currentNovel.rating === v ? 0 : v;
+            try {
+                await fetch(`${API}/${id}/rating`, {
+                    method: 'PUT',
+                    headers: { Authorization: AUTH, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rating: nova })
+                });
+                currentNovel.rating = nova;
+                highlightStars(nova);
+                toast(nova ? `Nota ${nova} ★ salva!` : 'Nota removida.');
+            } catch(e) { toast('Erro ao salvar nota.', true); }
         };
     });
+
+    // ── Utilitários ───────────────────────────────────────────
+    function initials(name) {
+        if (!name) return '?';
+        return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+    }
+
+    function toast(msg, err = false) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'toast show' + (err ? ' err' : '');
+        setTimeout(() => t.className = 'toast', 3000);
+    }
 
     load();
 </script>
