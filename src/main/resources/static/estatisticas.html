@@ -1150,38 +1150,66 @@
     // ── Metas dinâmicas ───────────────────────────────────────
     function renderMetas() {
         const n = novels;
-        const caps = n.reduce((s,x) => s+(x.chapter||0), 0);
-        const conc = n.filter(x=>x.status==='CONCLUIDA').length;
-        const total = n.length;
+        const caps     = n.reduce((s,x) => s+(x.chapter||0), 0);
+        const conc     = n.filter(x=>x.status==='CONCLUIDA').length;
+        const total    = n.length;
+        const favs     = n.filter(x=>x.favorito).length;
+        const rated    = n.filter(x=>x.rating).length;
+        const resenhas = n.filter(x=>x.resenha).length;
+        const horas    = Math.round(caps * 7 / 60);
 
-        // Gera metas de capítulos dinamicamente: próximo marco acima do atual
-        const marcos = [100, 500, 1000, 2500, 5000, 10000, 15000, 25000, 50000, 100000];
-        const metasCaps = marcos.filter(m => m <= caps * 2 || m === marcos.find(x => x > caps));
+        function filtrarMarcos(marcos, val) {
+            const concluidos = marcos.filter(m => m <= val);
+            const proximos   = marcos.filter(m => m > val).slice(0, 3);
+            return [...concluidos, ...proximos];
+        }
 
-        const metasFixas = [
-            ...metasCaps.slice(0, 5).map((m, i) => ({
-                lbl: `${m.toLocaleString('pt-BR')} capítulos`,
-                val: caps, max: m,
-                color: ['#38bdf8','#a78bfa','#34d399','#fbbf24','#fb923c'][i % 5]
-            })),
-            { lbl:'5 novels concluídas',   val:conc,  max:5,   color:'#34d399' },
-            { lbl:'10 novels concluídas',  val:conc,  max:10,  color:'#38bdf8' },
-            { lbl:'25 novels concluídas',  val:conc,  max:25,  color:'#a78bfa' },
-            { lbl:'20 novels cadastradas', val:total, max:20,  color:'#fbbf24' },
-            { lbl:'50 novels cadastradas', val:total, max:50,  color:'#fb923c' },
+        const CAPS_MARCOS   = [100,500,1000,2500,5000,7500,10000,15000,20000,25000,30000,50000,75000,100000];
+        const HORAS_MARCOS  = [50,100,200,500,1000,2000,5000];
+        const NOVEL_MARCOS  = [5,10,20,30,50,75,100];
+        const CONC_MARCOS   = [1,5,10,20,30,50];
+        const RAT_MARCOS    = [1,5,10,20];
+        const RES_MARCOS    = [1,5,10,20];
+        const FAV_MARCOS    = [1,5,10,20];
+
+        const PALETAS = [
+            ['#38bdf8','#a78bfa','#34d399','#fbbf24','#fb923c','#f87171','#22d3ee'],
+            ['#a78bfa','#38bdf8','#34d399','#fbbf24','#fb923c'],
+            ['#fbbf24','#fb923c','#f87171','#38bdf8','#34d399'],
+            ['#34d399','#38bdf8','#a78bfa','#fbbf24','#fb923c'],
+            ['#fbbf24','#fb923c','#f87171','#38bdf8'],
+            ['#a78bfa','#38bdf8','#34d399','#fbbf24'],
+            ['#f87171','#fb923c','#fbbf24','#34d399'],
         ];
 
-        document.getElementById('metas').innerHTML = metasFixas.map(m => {
-            const pct = Math.min(Math.round((m.val/m.max)*100), 100);
-            const done = pct >= 100;
-            return `<div class="progress-row">
-                <div class="progress-header">
-                    <span class="ph-name">${done ? '✅ ' : ''}${m.lbl}</span>
-                    <span class="ph-val">${m.val.toLocaleString('pt-BR')} / ${m.max.toLocaleString('pt-BR')} (${pct}%)</span>
-                </div>
-                <div class="progress-track">
-                    <div class="progress-fill" style="width:${pct}%; background:${m.color};${done?'box-shadow:0 0 8px '+m.color+'66':''}"></div>
-                </div>
+        const grupos = [
+            { titulo:'📖 Capítulos lidos',      marcos: CAPS_MARCOS,  val: caps,     pal: PALETAS[0] },
+            { titulo:'⏱️ Horas de leitura',     marcos: HORAS_MARCOS, val: horas,    pal: PALETAS[1] },
+            { titulo:'📚 Novels cadastradas',    marcos: NOVEL_MARCOS, val: total,    pal: PALETAS[2] },
+            { titulo:'✅ Novels concluídas',     marcos: CONC_MARCOS,  val: conc,     pal: PALETAS[3] },
+            { titulo:'⭐ Novels avaliadas',      marcos: RAT_MARCOS,   val: rated,    pal: PALETAS[4] },
+            { titulo:'✍️ Resenhas escritas',    marcos: RES_MARCOS,   val: resenhas, pal: PALETAS[5] },
+            { titulo:'❤️ Novels favoritas',     marcos: FAV_MARCOS,   val: favs,     pal: PALETAS[6] },
+        ];
+
+        document.getElementById('metas').innerHTML = grupos.map(g => {
+            const metas = filtrarMarcos(g.marcos, g.val);
+            return `<div style="margin-bottom:24px;">
+                <div style="font-size:0.78em;font-weight:800;color:var(--primary-light);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">${g.titulo}</div>
+                ${metas.map((m, i) => {
+                    const pct  = Math.min(Math.round((g.val/m)*100), 100);
+                    const done = g.val >= m;
+                    const cor  = g.pal[i % g.pal.length];
+                    return `<div class="progress-row">
+                        <div class="progress-header">
+                            <span class="ph-name">${done ? '✅ ' : ''}${m.toLocaleString('pt-BR')} ${g.titulo.replace(/[^a-zA-ZÀ-ú ]/g,'').trim().toLowerCase()}</span>
+                            <span class="ph-val">${g.val.toLocaleString('pt-BR')} / ${m.toLocaleString('pt-BR')} (${pct}%)</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" style="width:${pct}%; background:${cor};${done?'box-shadow:0 0 8px '+cor+'55':''}"></div>
+                        </div>
+                    </div>`;
+                }).join('')}
             </div>`;
         }).join('');
 
@@ -1190,33 +1218,54 @@
 
     // ── Conquistas ───────────────────────────────────────────
     function renderAchievements() {
-        const n = novels;
-        const caps  = n.reduce((s,x) => s+(x.chapter||0), 0);
-        const conc  = n.filter(x=>x.status==='CONCLUIDA').length;
-        const drop  = n.filter(x=>x.status==='DROPADA').length;
-        const favs  = n.filter(x=>x.favorito).length;
-        const rated = n.filter(x=>x.rating===5).length;
-        const resenhas = n.filter(x=>x.resenha).length;
-        const total = n.length;
-        const maior = Math.max(...n.map(x=>x.chapter||0), 0);
-        const taxaConc = total > 0 ? conc/total : 0;
+        const n       = novels;
+        const caps    = n.reduce((s,x) => s+(x.chapter||0), 0);
+        const conc    = n.filter(x=>x.status==='CONCLUIDA').length;
+        const drop    = n.filter(x=>x.status==='DROPADA').length;
+        const favs    = n.filter(x=>x.favorito).length;
+        const rated5  = n.filter(x=>x.rating===5).length;
+        const resenhas= n.filter(x=>x.resenha).length;
+        const total   = n.length;
+        const maior   = Math.max(...n.map(x=>x.chapter||0), 0);
+        const taxaConc= total > 0 ? conc/total : 0;
+        const horas   = Math.round(caps * 7 / 60);
+        const autores = new Set(n.map(x=>x.author).filter(Boolean)).size;
+        const rated   = n.filter(x=>x.rating).length;
 
         const all = [
-            { icon:'🌱', name:'Primeira novel',      desc:'Adicione sua primeira novel',        unlock: total >= 1 },
-            { icon:'📚', name:'Estante crescendo',   desc:'Tenha 10 novels cadastradas',        unlock: total >= 10 },
-            { icon:'🏛️', name:'Biblioteca pessoal', desc:'Tenha 50 novels cadastradas',        unlock: total >= 50 },
-            { icon:'📖', name:'Primeiro milhar',     desc:'Chegue a 1.000 capítulos lidos',     unlock: caps >= 1000 },
-            { icon:'🚀', name:'Leitor de respeito',  desc:'5.000 capítulos lidos',              unlock: caps >= 5000 },
-            { icon:'🔥', name:'Lendário',            desc:'Mais de 15.000 capítulos!',          unlock: caps >= 15000 },
-            { icon:'✅', name:'Primeiro fim',        desc:'Conclua sua primeira novel',         unlock: conc >= 1 },
-            { icon:'🏆', name:'Finalizador',         desc:'Conclua 10 novels',                  unlock: conc >= 10 },
-            { icon:'💎', name:'Taxa de ouro',        desc:'Mais de 60% de conclusão',           unlock: taxaConc >= 0.6 },
-            { icon:'⭐', name:'Crítico literário',   desc:'Avalie 5 novels com nota máxima',    unlock: rated >= 5 },
-            { icon:'✍️', name:'Resenhista',         desc:'Escreva 10 resenhas',                unlock: resenhas >= 10 },
-            { icon:'❤️', name:'Colecionador',       desc:'Tenha 10 novels favoritas',          unlock: favs >= 10 },
-            { icon:'💪', name:'Maratonista',         desc:'Uma novel com 500+ capítulos',       unlock: maior >= 500 },
-            { icon:'🌟', name:'Ultra maratonista',   desc:'Uma novel com 1000+ capítulos',      unlock: maior >= 1000 },
-            { icon:'🎭', name:'Dropador',            desc:'Drope sua primeira novel',           unlock: drop >= 1 },
+            // Estante
+            { icon:'🌱', name:'Primeira novel',        desc:'Adicione sua primeira novel',           unlock: total >= 1 },
+            { icon:'📚', name:'Estante crescendo',      desc:'10 novels cadastradas',                 unlock: total >= 10 },
+            { icon:'🏛️', name:'Biblioteca pessoal',    desc:'50 novels cadastradas',                 unlock: total >= 50 },
+            { icon:'🏰', name:'Grande biblioteca',      desc:'100 novels cadastradas',                unlock: total >= 100 },
+            // Capítulos
+            { icon:'📖', name:'Primeiros 100',          desc:'100 capítulos lidos',                   unlock: caps >= 100 },
+            { icon:'🎯', name:'Primeiro milhar',        desc:'1.000 capítulos lidos',                 unlock: caps >= 1000 },
+            { icon:'🚀', name:'Leitor dedicado',        desc:'5.000 capítulos lidos',                 unlock: caps >= 5000 },
+            { icon:'🔥', name:'Leitor de respeito',     desc:'10.000 capítulos lidos',                unlock: caps >= 10000 },
+            { icon:'💥', name:'Máquina de leitura',     desc:'25.000 capítulos lidos',                unlock: caps >= 25000 },
+            { icon:'🌌', name:'Lendário',               desc:'50.000 capítulos lidos',                unlock: caps >= 50000 },
+            { icon:'👑', name:'Transcendente',          desc:'100.000 capítulos lidos',               unlock: caps >= 100000 },
+            // Horas
+            { icon:'⏱️', name:'Horas de leitura',      desc:'100 horas lidas',                       unlock: horas >= 100 },
+            { icon:'🕐', name:'Tempo investido',        desc:'500 horas lidas',                       unlock: horas >= 500 },
+            { icon:'⌛', name:'Mil horas',              desc:'1.000 horas lidas',                     unlock: horas >= 1000 },
+            // Conclusões
+            { icon:'✅', name:'Primeiro fim',           desc:'Conclua sua primeira novel',            unlock: conc >= 1 },
+            { icon:'🏆', name:'Finalizador',            desc:'10 novels concluídas',                  unlock: conc >= 10 },
+            { icon:'💎', name:'Taxa de ouro',           desc:'Mais de 60% de conclusão',              unlock: taxaConc >= 0.6 },
+            // Maratonas
+            { icon:'💪', name:'Maratonista',            desc:'Uma novel com 500+ caps',               unlock: maior >= 500 },
+            { icon:'🌟', name:'Ultra maratonista',      desc:'Uma novel com 1.000+ caps',             unlock: maior >= 1000 },
+            { icon:'🐉', name:'Dragão do Web Novel',    desc:'Uma novel com 2.000+ caps',             unlock: maior >= 2000 },
+            // Social
+            { icon:'⭐', name:'Crítico literário',      desc:'Avalie 5 novels com nota máxima',       unlock: rated5 >= 5 },
+            { icon:'✍️', name:'Resenhista',            desc:'Escreva 10 resenhas',                    unlock: resenhas >= 10 },
+            { icon:'❤️', name:'Colecionador',          desc:'10 novels favoritas',                    unlock: favs >= 10 },
+            { icon:'✒️', name:'Autor favorito',        desc:'Leia de 10 autores diferentes',          unlock: autores >= 10 },
+            // Drop
+            { icon:'🎭', name:'Dropador',               desc:'Drope sua primeira novel',              unlock: drop >= 1 },
+            { icon:'🧐', name:'Seletivo',               desc:'Avalie 20 novels',                      unlock: rated >= 20 },
         ];
 
         document.getElementById('achievements').innerHTML = all.map(a => `
@@ -1298,7 +1347,7 @@
         }
 
         // Carrega estado salvo
-        const saved = localStorage.getItem(TIER_KEY);
+        const saved = (() => { try { return localStorage.getItem(TIER_KEY); } catch(e) { return null; } })();
         if (saved) {
             try { tierState = JSON.parse(saved); } catch(e) {}
         }
@@ -1425,12 +1474,12 @@
     }
 
     function saveTierList() {
-        localStorage.setItem(TIER_KEY, JSON.stringify(tierState));
+        try { localStorage.setItem(TIER_KEY, JSON.stringify(tierState)); } catch(e) { window._tierBackup = JSON.stringify(tierState); }
         toast('Tier list salva! 💾');
     }
 
     function resetTierList() {
-        localStorage.removeItem(TIER_KEY);
+        try { localStorage.removeItem(TIER_KEY); } catch(e) { window._tierBackup = null; }
         const favs = novels.filter(x => x.favorito);
         tierState = { S:[], A:[], B:[], C:[], D:[], pool: favs.map(x => String(x.id)) };
         renderTierRows(favs);
